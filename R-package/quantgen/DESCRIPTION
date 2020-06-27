@@ -1,0 +1,11 @@
+Package: quantgen
+Type: Package
+Title: Tools for generalized quantile modeling
+Version: 1.0.0
+Date: 2020-06-06
+Author: Ryan Tibshirani
+Maintainer: Ryan Tibshirani <ryantibs@stat.cmu.edu>
+Depends: Matrix, gurobi
+Description: Tools for quantile modeling: penalized quantile regression, cross-validation, and ensembles.    
+License: GPL-2
+RoxygenNote: 6.1.1

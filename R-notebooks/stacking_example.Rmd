@@ -1,0 +1,142 @@
+---
+title: "Quantile Stacking"
+author: "Ryan Tibshirani"
+date: "June 10, 2020"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=5)
+```
+
+$$
+\newcommand{\argmin}{\mathop{\mathrm{argmin}}}
+\newcommand{\argmax}{\mathop{\mathrm{argmax}}}
+\newcommand{\minimize}{\mathop{\mathrm{minimize}}}
+\newcommand{\st}{\mathop{\mathrm{subject\,\,to}}}
+$$
+
+Problem setup
+===
+
+Consider the problem
+\begin{alignat*}{2}
+&\minimize_\alpha \quad && 
+\sum_{k=1}^r \sum_{i=1}^n w_i \psi_{\tau_k} \bigg(y_i - \sum_{j=1}^p \alpha_j q_{ijk} \bigg) \\
+&\st && \sum_{j=1}^p \alpha_j = 1, \; \alpha_j \geq 0.
+\end{alignat*}
+Here $\tau_k$, $k=1,\ldots,r$ is a set of quantile levels, assumed to be in increasing order and each $q_{ijk}$ is an estimate of the quantile of $y_i$ at the level $\tau_k$, from ensemble component member $j$ Also, 
+$$
+\psi_\tau(v) = \max\{\tau v, (\tau-1) v)\},
+$$
+often called the "pinball" or "tilted $\ell_1$" loss, for a quantile level $\tau \in (0,1)$, and $w_i$, $i=1,\ldots,n$ are observation weights. A more flexible approach would be to estimate a separate ensemble weight $\alpha_{jk}$ per component method $j$ and quantile level $k$: 
+\begin{alignat*}{2}
+&\minimize_\alpha \quad && 
+\sum_{k=1}^r \sum_{i=1}^n w_i \psi_{\tau_k} \bigg(y_i - \sum_{j=1}^p \alpha_{jk} q_{ijk} \bigg) \\
+&\st && \sum_{j=1}^p \alpha_{jk} = 1, \; \alpha_{jk} \geq 0.
+\end{alignat*}
+As a form of regularization, we can additionally incorporate **noncrossing** constraints into the above optimization, which take the form:
+$$
+\alpha_{\bullet,k}^T q \leq \alpha_{\bullet,k+1}^T q, \; q \in \mathcal{Q}.
+$$
+where $\mathcal{Q}$ is some collection of points over which to enforce the constraints (for example, the training points, or the training points along with some unlabeled test points). 
+
+LP reformulation
+===
+
+Here are the LP formulations of the two quantile stacking approaches. The standard one: 
+\begin{alignat*}{2}
+&\minimize_{\alpha,u} \quad && \sum_{i=1}^n w_i \sum_{k=1}^r u_{ik} \\
+&\st \quad && u_{ik} \geq \tau_k \bigg(y_i - \sum_{j=1}^p \alpha_j q_{ijk}\bigg), \\ 
+&&& u_{ik} \geq (\tau_k-1)\bigg(y_i - \sum_{j=1}^p \alpha_j q_{ijk}\bigg), \\
+&&& \sum_{j=1}^p \alpha_j = 1 \; \alpha_j \geq 0.
+\end{alignat*}
+The flexible one: 
+\begin{alignat*}{2}
+&\minimize_{\alpha,u} \quad && \sum_{i=1}^n w_i \sum_{k=1}^r u_{ik} \\
+&\st \quad && u_{ik} \geq \tau_k \bigg(y_i - \sum_{j=1}^p \alpha_{jk} q_{ijk}\bigg), \\ 
+&&& u_{ik} \geq (\tau_k-1)\bigg(y_i - \sum_{j=1}^p \alpha_{jk} q_{ijk}\bigg), \\
+&&& \sum_{j=1}^p \alpha_{jk} = 1 \; \alpha_{jk} \geq 0, \\
+&&& \alpha_{\bullet,k}^T q \leq \alpha_{\bullet,k+1}^T q, \; q \in \mathcal{Q}.
+\end{alignat*}
+
+Heavy-tailed example
+===
+
+We give a simple example of regression data with a skewed error distribution: Gaussian for the left tail, and t-distributed (with 3 degrees of freedom) for the right tail. We use three methods to estimate the conditional quantile function, at 23 quantile levels: 
+
+1. lasso, tuned by cross-validation (CV), plus Gaussian tails;
+2. quantile lasso at 5 quantile levels, also tuned by CV, then extrapolated out to the full set of 23;
+3. quantile lasso "refit" (starting from the previous CV-tuned model) to the full 23 quantile levels. 
+
+As we can see from the plots below, the first method often generally does poorly, both in the tails and also in the middle of the distribution (because it models the conditional mean, not the conditional median, and these are quite different due to skewness); the second method often does better in the left tail but underestimates quantiles in the extreme right tail (because it extrapolates using a Gaussian quantile function); and the third method often does better in the right tail and underestimates quantiles the extreme left tail. We can see that flexible stacking roughly learns how to account for these complementary strengths/weaknesses, and sets ensembles weights accordingly.
+
+```{r}
+library(glmnet)
+library(quantgen)
+
+set.seed(33)
+n = 300
+p = 50
+x = matrix(rnorm(n*p), n, p)
+mu = function(x) x[1] + x[2]
+e = ifelse(runif(n) < 0.5, -abs(rnorm(n)), abs(rt(n, df=3)))
+y = apply(x, 1, mu) + e
+
+# Histogram of error distribution: skewed, and heavy-tailed on one side
+hist(e, breaks=40, col="lightblue", main="Error distribution", prob=TRUE)
+lines(density(e), lwd=2)
+
+# Run CV for usual lasso, and quantile lasso
+tau = c(0.1, 0.3, 0.5, 0.7, 0.9)
+glmnet_obj = cv.glmnet(x, y, nfolds=5)
+quant_obj = cv_quantile_lasso(x, y, tau=tau, nlambda=30, nfolds=5, verbose=TRUE, sort=TRUE)
+plot(glmnet_obj)
+plot(quant_obj)
+
+# Refit quantile lasso at more quantile levels
+tau_new = c(0.01, 0.025, seq(0.05, 0.95, by=0.05), 0.975, 0.99) 
+refit_obj = refit_quantile_lasso(quant_obj, x, y, tau_new, verbose=TRUE)
+
+# Generate test data 
+n0 = 300
+x0 = matrix(rnorm(n0*p), n0, p)
+e0 = ifelse(runif(n0) < 0.5, -abs(rnorm(n0)), abs(rt(n0, df=3)))
+y0 = apply(x0, 1, mu) + e0
+
+# Predicted quantiles at test points 
+qtrue = outer(apply(x0, 1, mu), ifelse(tau_new < 0.5, qnorm(tau_new), qt(tau_new, df=3)), "+")
+qpred1 = outer(as.numeric(predict(glmnet_obj, x0)), qnorm(tau_new), "+")
+qpred2_init = predict(quant_obj, x0, sort=TRUE)
+qpred2 = quantile_extrapolate(tau, qpred2_init, tau_new, qfun_left=qnorm, qfun_right=qnorm)
+qpred3 = predict(refit_obj, x0, sort=TRUE)
+
+par(mfrow=c(1,3))
+for (i in 1:9) {
+  plot(tau_new, qtrue[i,], type="o", ylim=range(qtrue, qpred1, qpred2, qpred3), ylab="Quantile")
+  lines(tau_new, qpred1[i,], col=2, pch=20, type="o")
+  lines(tau_new, qpred2[i,], col=3, pch=20, type="o")
+  lines(tau_new, qpred3[i,], col=4, pch=20, type="o")
+  legend("topleft", legend=c("True", "Lasso", "QLasso (extrap)", "QLasso (refit)"), 
+         col=1:4, pch=c(21,20,20,20))
+}
+
+# Construct array of predicted quantiles
+qarr = combine_into_array(qpred1, qpred2, qpred3)
+
+# Standard stacking: one weight per ensemble member
+st_obj1 = quantile_ensemble(qarr, y0, tau_new, verbose=TRUE)
+coef(st_obj1)
+
+# Flexible stacking: one weight per ensemble member, per quantile level
+st_obj2 = quantile_ensemble(qarr, y0, tau_new, tau_groups=1:length(tau_new), verbose=TRUE)
+coef(st_obj2)
+
+# Somewhere in the middle: group the extreme 3 quantiles together on either tail, and the middle 
+st_obj3 = quantile_ensemble(qarr, y0, tau_new, tau_groups=c(rep(1,3),rep(2,17),rep(3,3)), verbose=TRUE)
+coef(st_obj3)
+
+# Make predictions back on qarr
+head(predict(st_obj1, newq=qarr))
+head(predict(st_obj2, newq=qarr))
+head(predict(st_obj3, newq=qarr))
+```
