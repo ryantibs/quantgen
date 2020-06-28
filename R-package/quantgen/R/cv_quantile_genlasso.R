@@ -44,7 +44,8 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                 jitter=NULL, verbose=FALSE, sort=FALSE,
                                 iso=FALSE, nonneg=FALSE, round=FALSE) {
   # Check arguments
-  if (is.null(weights)) weights = rep(1,length(y))
+  n = length(y); p = ncol(x); m = nrow(d)
+  if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
   
   # Set the lambda sequence, if we need to

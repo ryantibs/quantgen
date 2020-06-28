@@ -108,7 +108,8 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
                              warm_starts=TRUE, params=list(), transform=NULL,
                              inv_trans=NULL, jitter=NULL, verbose=FALSE) {
   # Check arguments
-  if (is.null(weights)) weights = rep(1,length(y))
+  n = length(y); p = ncol(x); m = nrow(d)
+  if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
   if (noncross) warning("Noncrossing constraints currently not implemented!")
 
@@ -119,7 +120,6 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
   d = a$d
   sx = a$sx
   bx = a$bx
-  n = nrow(x)
   p = ncol(x)
   m = nrow(d)
 
@@ -305,6 +305,7 @@ coef.quantile_genlasso = function(obj, s=NULL) {
 
 predict.quantile_genlasso = function(obj, newx, s=NULL, sort=FALSE, iso=FALSE,
                                      nonneg=FALSE, round=FALSE) {
+  # Set up some basics
   newx = as.matrix(newx); n0 = nrow(newx)
   if (obj$intercept || obj$standardize) newx = cbind(rep(1,n0), newx) 
   z = as.matrix(newx %*% coef(obj,s))
@@ -404,9 +405,9 @@ quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
 
 get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) { 
   # Check arguments, set up basic objects we will need
-  if (is.null(weights)) weights = rep(1,length(y))
+  n = length(y); p = ncol(x); m = nrow(d)
+  if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
-  n = nrow(x); p = ncol(x); m = nrow(d)
   Zmm = Matrix(0,m,m,sparse=TRUE); Imm = Diagonal(m)
   model = list()
   
@@ -477,11 +478,10 @@ get_lambda_seq = function(x, y, d, nlambda, lambda_min_ratio, weights=NULL,
 
   # Set up some basics
   a = setup_xyd(x, y, d, intercept, standardize, transform)
-  x = a$x
-  y = a$y
-  d = a$d
-  
-  lambda_max = get_lambda_max(x, y, d)
+  x = a$x; y = a$y; d = a$d
+
+  # Compute lambda max then form and return a lambda sequence
+  lambda_max = get_lambda_max(x, y, d, weights, lp_solver)
   return(exp(seq(log(lambda_max), log(lambda_max * lambda_min_ratio),
                  length=nlambda)))
 }
@@ -507,7 +507,8 @@ get_lambda_seq = function(x, y, d, nlambda, lambda_min_ratio, weights=NULL,
 #' @export
 
 predict.quantile_genlasso_grid = function(obj, newx, sort=FALSE, iso=FALSE, 
-                                          nonneg=FALSE, round=FALSE) { 
+                                          nonneg=FALSE, round=FALSE) {
+  # Set up some basics
   newx = as.matrix(newx); n0 = nrow(newx)
   if (obj$intercept || obj$standardize) newx = cbind(rep(1,n0), newx)
   z = as.matrix(newx %*% coef(obj))

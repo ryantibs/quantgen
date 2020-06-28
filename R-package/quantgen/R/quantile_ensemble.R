@@ -95,7 +95,6 @@ quantile_ensemble = function(qarr, y, tau, weights=NULL,
                              lp_solver="gurobi", time_limit=NULL, params=list(),
                              verbose=FALSE) {  
   # Set up some basics
-  y = as.numeric(y)
   n = dim(qarr)[1]
   p = dim(qarr)[2]
   r = dim(qarr)[3] 
@@ -414,6 +413,7 @@ coef.quantile_ensemble = function(obj) {
 
 predict.quantile_ensemble = function(obj, newq, s=NULL, sort=TRUE, iso=FALSE, 
                                      nonneg=FALSE, round=FALSE) {
+  # Set up some basics
   n0 = dim(newq)[1]
   p = dim(newq)[2]
   r = dim(newq)[3] 
