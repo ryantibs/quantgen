@@ -1,0 +1,40 @@
+coef.quantile_ensemble
+                        Coef function for quantile_ensemble object
+coef.quantile_genlasso
+                        Coef function for quantile_genlasso object
+combine_into_array      Combine matrices into an array
+cv_quantile_genlasso    Cross-validation for quantile generalized lasso
+cv_quantile_lasso       Cross-validation for quantile lasso
+get_diff_mat            Difference matrix
+get_lambda_max          Lambda max for quantile generalized lasso
+get_lambda_seq          Lambda sequence for quantile generalized lasso
+log_pad                 Convenience functions for log padding
+plot.cv_quantile_genlasso
+                        Plot function for quantile_genlasso object
+predict.cv_quantile_genlasso
+                        Predict function for cv_quantile_genlasso
+                        object
+predict.quantile_ensemble
+                        Predict function for quantile_ensemble object
+predict.quantile_genlasso
+                        Predict function for quantile_genlasso object
+predict.quantile_genlasso_grid
+                        Predict function for quantile_genlasso_grid
+                        object
+quantile_ensemble       Quantile ensemble
+quantile_extrapolate    Quantile extrapolater
+quantile_genlasso       Quantile generalized lasso
+quantile_genlasso_grid
+                        Quantile generalized lasso on a tau by lambda
+                        grid
+quantile_genlasso_objective
+                        Quantile generalized lasso objective
+quantile_lasso          Quantile lasso.
+quantile_lasso_grid     Quantile lasso on a tau by lambda grid
+quantile_lasso_objective
+                        Quantile lasso objective
+quantile_loss           Quantile loss
+refit_quantile_genlasso
+                        Refit function for cv_quantile_genlasso object
+refit_quantile_lasso    Refit function for cv_quantile_lasso object
+unif_jitter             Convenience function for uniform jitter
