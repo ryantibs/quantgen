@@ -100,7 +100,7 @@
 #'   GLPK (which free for everyone, but slower).
 #'
 #' @importFrom graphics legend matplot
-#' @importFrom  stats approx coef isoreg median predict qnorm runif sd splinefun
+#' @importFrom stats approx coef isoreg median predict qnorm runif sd splinefun
 #' @importFrom Rglpk Rglpk_solve_LP
 #' @importFrom Matrix Matrix Diagonal
 #' @author Ryan Tibshirani
@@ -108,16 +108,16 @@
 
 quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
                              standardize=TRUE, noncross=FALSE, x0=NULL,
-                             lp_solver=c("gurobi", "glpk"), time_limit=NULL,
+                             lp_solver=c("gurobi","glpk"), time_limit=NULL,
                              warm_starts=TRUE, params=list(), transform=NULL,
                              inv_trans=NULL, jitter=NULL, verbose=FALSE) {
-  # Check arguments
+  # Set up some basics
   n = length(y); p = ncol(x); m = nrow(d)
   if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
   if (noncross) warning("Noncrossing constraints currently not implemented!")
 
-  # Set up some basics
+  # Set up x, y, d
   a = setup_xyd(x, y, d, intercept, standardize, transform)
   x = a$x
   y = a$y
@@ -161,7 +161,6 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
                                 lp_solver="gurobi", params=list(),
                                 warm_starts=TRUE, time_limit=time_limit,
                                 jitter=NULL, verbose=FALSE) {
-
   # Set up some basic objects that we will need
   n = nrow(x); p = ncol(x); m = nrow(d)
   Inn = Diagonal(n); Imm = Diagonal(m)
@@ -170,13 +169,15 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
   model = list()
   model$sense = rep(">=", 2*n+2*m)
 
-  # Gurobi setup
-  use_gurobi  <- (lp_solver == "gurobi") && (requireNamespace("gurobi", quietly = TRUE))
+  # Determine LP solver
+  use_gurobi = FALSE
+  if (lp_solver == "gurobi") {
+    if (requireNamespace("gurobi", quietly=TRUE)) use_gurobi = TRUE
+    else warning("gurobi R package not installed, using Rglpk instead.")
+  }
+
   # Gurobi setup
   if (use_gurobi) {
-    ## if (!require("gurobi",quietly=TRUE)) {
-    ##   stop("Package gurobi not installed (required here)!")
-    ## }
     if (!is.null(time_limit)) params$TimeLimit = time_limit
     if (is.null(params$LogToConsole)) params$LogToConsole = 0
     if (verbose && length(tau) == 1) params$LogToConsole = 1
@@ -185,9 +186,6 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
 
   # GLPK setup
   else {
-    ## if (!require("Rglpk",quietly=TRUE)) {
-    ##   stop("Package Rglpk not installed (required here)!")
-    ## }
     if (!is.null(time_limit)) params$tm_limit = time_limit * 1000
     if (verbose && length(tau) == 1) params$verbose = TRUE
     model$bounds = list(lower=list(ind=1:p, val=rep(-Inf,p)))
@@ -235,7 +233,7 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
       }
 
       # Call Gurobi's LP solver, store results
-      a = gurobi::gurobi(model=model, params=params)
+      a = gurobi(model=model, params=params)
       beta[,j] = a$x[1:p]
       status[j] = a$status
       if (warm_starts) last_sol = a$x
@@ -244,7 +242,7 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
     # GLPK
     else {
       # Call GLPK's LP solver, store results
-      a = Rglpk::Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
+      a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
                          rhs=model$rhs, bounds=model$bounds, control=params)
       beta[,j] = a$solution[1:p]
       status[j] = a$status
@@ -270,8 +268,8 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
 #'   differently, \code{s} specifies the columns of \code{obj$beta} to retrieve
 #'   for the coefficients.)  Default is NULL, which means that all tau and
 #'   lambda values will be considered.
-#' @param ... further arguments
-#' #'
+#' @param ... Additional arguments (not used).
+#' 
 #' @method coef quantile_genlasso
 #' @export
 
@@ -309,22 +307,24 @@ coef.quantile_genlasso = function(object, s=NULL, ...) {
 #'   Natural for count data. Default is FALSE.
 #' @param round Should the returned quantile estimates be rounded? Natural for
 #'   count data. Default is FALSE.
+#' @param ... Additional arguments (not used).
+#' 
 #' @method predict quantile_genlasso
-#'
 #' @export
-predict.quantile_genlasso = function(object, newx, s=NULL, sort=FALSE, iso=FALSE,
-                                     nonneg=FALSE, round=FALSE, ...) {
-    obj  <- object
+
+predict.quantile_genlasso = function(object, newx, s=NULL, sort=FALSE,
+                                     iso=FALSE, nonneg=FALSE, round=FALSE,
+                                     ...) {
   # Set up some basics
   newx = as.matrix(newx); n0 = nrow(newx)
-  if (obj$intercept || obj$standardize) newx = cbind(rep(1,n0), newx)
-  z = as.matrix(newx %*% coef(obj,s))
+  if (object$intercept || object$standardize) newx = cbind(rep(1,n0), newx) 
+  z = as.matrix(newx %*% coef(object,s))
 
   # Apply the inverse transform, if we're asked to
-  if (!is.null(obj$inv_trans)) {
+  if (!is.null(object$inv_trans)) {
     # Annoying, must handle carefully the case that z drops to a vector
     names = colnames(z)
-    z = apply(z, 2, obj$inv_trans)
+    z = apply(z, 2, object$inv_trans)
     z = matrix(z, nrow=n0)
     colnames(z) = names
   }
@@ -370,7 +370,7 @@ quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                   warm_starts=TRUE, params=list(),
                                   transform=NULL, inv_trans=NULL, jitter=NULL,
                                   verbose=FALSE) {
-  # Check arguments
+  # Set up some basics
   if (is.null(weights)) weights = rep(1,length(y))
   lp_solver = match.arg(lp_solver)
 
@@ -414,7 +414,7 @@ quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
 #' @export
 
 get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) {
-  # Check arguments, set up basic objects we will need
+  # Set up some basic objects that we will need
   n = length(y); p = ncol(x); m = nrow(d)
   if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
@@ -441,27 +441,27 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) {
                   cbind(Matrix::t(d), rep(0,p)))
   model$rhs = c(rep(0, 2*m), t(x) %*% v)
 
+  # Determine LP solver
+  use_gurobi = FALSE
+  if (lp_solver == "gurobi") {
+    if (requireNamespace("gurobi", quietly=TRUE)) use_gurobi = TRUE
+    else warning("gurobi R package not installed, using Rglpk instead.")
+  }
+  
   # Gurobi
-  use_gurobi  <- (lp_solver == "gurobi") && (requireNamespace("gurobi", quietly = TRUE))
   if (use_gurobi) {
-    ## if (!require("gurobi",quietly=TRUE)) {
-    ##   stop("Package gurobi not installed (required here)!")
-    ## }
     model$sense = c(rep(">=", 2*m), rep("=", p))
     model$lb = c(rep(-Inf,m), 0)
-    a = gurobi::gurobi(model=model, params=list(LogToConsole=0))
+    a = gurobi(model=model, params=list(LogToConsole=0))
     lambda_max = a$x[m+1]
   }
 
   # GLPK
   else {
-    ## if (!require("Rglpk",quietly=TRUE)) {
-    ##   stop("Package Rglpk not installed (required here)!")
-    ## }
     model$sense = c(rep(">=", 2*m), rep("==", p))
     model$bounds = list(lower=list(ind=1:m, val=rep(-Inf,m)))
-    a = Rglpk::Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                              rhs=model$rhs, bounds=model$bounds)
+    a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
+                       rhs=model$rhs, bounds=model$bounds)
     lambda_max = a$solution[m+1]
   }
 
@@ -483,11 +483,11 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) {
 get_lambda_seq = function(x, y, d, nlambda, lambda_min_ratio, weights=NULL,
                           intercept=TRUE, standardize=TRUE,
                           lp_solver=c("gurobi","glpk"), transform=NULL) {
-  # Check arguments
+  # Set up some basics
   if (is.null(weights)) weights = rep(1,length(y))
   lp_solver = match.arg(lp_solver)
 
-  # Set up some basics
+  # Set up x, y, d
   a = setup_xyd(x, y, d, intercept, standardize, transform)
   x = a$x; y = a$y; d = a$d
 
@@ -518,27 +518,27 @@ get_lambda_seq = function(x, y, d, nlambda, lambda_min_ratio, weights=NULL,
 #' @method predict quantile_genlasso_grid
 #' @export
 
-predict.quantile_genlasso_grid = function(object, newx, sort=FALSE, iso=FALSE,
-                                          nonneg=FALSE, round=FALSE, ...) {
-    obj  <- object
+predict.quantile_genlasso_grid = function(object, newx, sort=FALSE, iso=FALSE,  
+                                          nonneg=FALSE, round=FALSE, ...) { 
   # Set up some basics
   newx = as.matrix(newx); n0 = nrow(newx)
-  if (obj$intercept || obj$standardize) newx = cbind(rep(1,n0), newx)
-  z = as.matrix(newx %*% coef(obj))
+  if (object$intercept || object$standardize) newx = cbind(rep(1,n0), newx) 
+  z = as.matrix(newx %*% coef(object))
 
   # Apply the inverse transform, if we're asked to
-  if (!is.null(obj$inv_trans)) {
+  if (!is.null(object$inv_trans)) {
     # Annoying, must handle carefully the case that z drops to a vector
     names = colnames(z)
-    z = apply(z, 2, obj$inv_trans)
+    z = apply(z, 2, object$inv_trans)
     z = matrix(z, nrow=n0)
     colnames(z) = names
   }
 
   # Now format into an array
-  z = array(z, dim=c(n0, length(unique(obj$lambda)), length(unique(obj$tau))))
-  dimnames(z)[[2]] = sprintf("l=%g", unique(obj$lambda))
-  dimnames(z)[[3]] = sprintf("t=%g", unique(obj$tau))
+  z = array(z, dim=c(n0, length(unique(object$lambda)),
+                     length(unique(object$tau)))) 
+  dimnames(z)[[2]] = sprintf("l=%g", unique(object$lambda))
+  dimnames(z)[[3]] = sprintf("t=%g", unique(object$tau))
 
   # Run isotonic regression, sort, truncated, round, if we're asked to
   for (i in 1:dim(z)[1]) {

@@ -33,6 +33,8 @@ Natural for count data. Default is FALSE.}
 
 \item{round}{Should the returned quantile estimates be rounded? Natural for
 count data. Default is FALSE.}
+
+\item{...}{Additional arguments (not used).}
 }
 \description{
 Predict the conditional quantiles at a new set of ensemble realizations,

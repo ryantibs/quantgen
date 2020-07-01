@@ -18,8 +18,7 @@ differently, \code{s} specifies the columns of \code{obj$beta} to retrieve
 for the coefficients.)  Default is NULL, which means that all tau and
 lambda values will be considered.}
 
-\item{...}{further arguments
-#'}
+\item{...}{Additional arguments (not used).}
 }
 \description{
 Retrieve generalized lasso coefficients for estimating the conditional

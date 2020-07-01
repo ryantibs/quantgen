@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{The \code{quantile_ensemble} object.}
 
-\item{...}{further arguments}
+\item{...}{Additional arguments (not used).}
 }
 \description{
 Retrieve ensemble coefficients for estimating the conditional quantiles at

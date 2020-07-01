@@ -109,7 +109,7 @@ unif_jitter = function(a=0, b=0.01) function(n) runif(n,a,b)
 #' @param k Order of the difference matrix.
 #'
 #' @return A sparse matrix of dimension (p - k) x p.
-#' @importFrom Matrix bandSparse Diagonal bdiag
+#' @importFrom Matrix bandSparse bdiag
 #' @export
 
 get_diff_mat = function(p, k) {

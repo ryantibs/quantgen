@@ -11,6 +11,8 @@
 
 \item{legend_pos}{Position for the legend; default is "topleft"; use NULL to
 suppress the legend.}
+
+\item{...}{Additional arguments (not used).}
 }
 \description{
 Plot the cross-validation error curves, for each quantile level, as functions

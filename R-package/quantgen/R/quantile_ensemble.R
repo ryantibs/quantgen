@@ -96,12 +96,12 @@ quantile_ensemble = function(qarr, y, tau, weights=NULL,
                              lp_solver=c("gurobi", "glpk"), time_limit=NULL, params=list(),
                              verbose=FALSE) {
   # Set up some basics
-  lp_solver <- match.arg(lp_solver)
   n = dim(qarr)[1]
   p = dim(qarr)[2]
   r = dim(qarr)[3]
   if (is.null(weights)) weights = rep(1,n)
-
+  lp_solver = match.arg(lp_solver)
+  
   # Add an all 1s matrix to qarr, if we need to
   if (intercept) {
     a = array(NA, dim=c(n,p+1,r))
@@ -146,12 +146,15 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
   INN = Diagonal(N)
   model = list()
 
+  # Determine LP solver
+  use_gurobi = FALSE
+  if (lp_solver == "gurobi") {
+    if (requireNamespace("gurobi", quietly=TRUE)) use_gurobi = TRUE
+    else warning("gurobi R package not installed, using Rglpk instead.")
+  }
+  
   # Gurobi setup
-  use_gurobi  <- (lp_solver == "gurobi") && (requireNamespace("gurobi", quietly = TRUE))
   if (use_gurobi) {
-    ## if (!require("gurobi",quietly=TRUE)) {
-    ##   stop("Package gurobi not installed (required here)!")
-    ## }
     if (!is.null(time_limit)) params$TimeLimit = time_limit
     if (is.null(params$LogToConsole)) params$LogToConsole = 0
     if (verbose) params$LogToConsole = 1
@@ -160,9 +163,6 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
 
   # GLPK setup
   else {
-    ## if (!require("Rglpk",quietly=TRUE)) {
-    ##   stop("Package Rglpk not installed (required here)!")
-    ## }
     if (!is.null(time_limit)) params$tm_limit = time_limit * 1000
     if (verbose) params$verbose = TRUE
     equal_sign = "=="
@@ -201,33 +201,27 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
 
   # Remove nonnegativity constraint on alpha, if we're asked to
   if (!nonneg) {
-      if (use_gurobi) {
-          model$lb = c(rep(-Inf,p), rep(0,N))
-      } else {
-          model$bounds = list(lower=list(ind=1:p, val=rep(-Inf,p)))
-      }
+    if (use_gurobi) model$lb = c(rep(-Inf,p), rep(0,N))
+    else model$bounds = list(lower=list(ind=1:p, val=rep(-Inf,p)))
   }
 
   # Remove nonnegativity constraint on intercept, if needed
   if (intercept && nonneg) {
-      if (use_gurobi) {
-          model$lb = c(-Inf, rep(0,p-1+N))
-      } else {
-          model$bounds = list(lower=list(ind=1, val=-Inf))
-      }
+    if (use_gurobi) model$lb = c(-Inf, rep(0,p-1+N))
+    else model$bounds = list(lower=list(ind=1, val=-Inf))
   }
 
   # Call Gurobi's LP solver, store results
   if (use_gurobi) {
-    a = gurobi::gurobi(model=model, params=params)
+    a = gurobi(model=model, params=params)
     alpha = a$x[1:p]
     status = a$status
   }
 
   # Call GLPK's LP solver, store results
   else {
-    a = Rglpk::Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                               rhs=model$rhs, bounds=model$bounds, control=params)
+    a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
+                       rhs=model$rhs, bounds=model$bounds, control=params)
     alpha = a$solution[1:p]
     status = a$status
   }
@@ -250,12 +244,15 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   INN = Diagonal(N)
   model = list()
 
+  # Determine LP solver
+  use_gurobi = FALSE
+  if (lp_solver == "gurobi") {
+    if (requireNamespace("gurobi", quietly=TRUE)) use_gurobi = TRUE
+    else warning("gurobi R package not installed, using Rglpk instead.")
+  }
+  
  # Gurobi setup
-  use_gurobi  <- (lp_solver == "gurobi") && (requireNamespace("gurobi", quietly = TRUE))
   if (use_gurobi) {
-    ## if (!require("gurobi",quietly=TRUE)) {
-    ##   stop("Package gurobi not installed (required here)!")
-    ## }
     if (!is.null(time_limit)) params$TimeLimit = time_limit
     if (is.null(params$LogToConsole)) params$LogToConsole = 0
     if (verbose) params$LogToConsole = 1
@@ -264,9 +261,6 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
 
   # GLPK setup
   else {
-    ## if (!require("Rglpk",quietly=TRUE)) {
-    ##   stop("Package Rglpk not installed (required here)!")
-    ## }
     if (!is.null(time_limit)) params$tm_limit = time_limit * 1000
     if (verbose) params$verbose = TRUE
     equal_sign = "=="
@@ -370,15 +364,15 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
 
   # Call Gurobi's LP solver, store results
   if (use_gurobi) {
-    a = gurobi::gurobi(model=model, params=params)
+    a = gurobi(model=model, params=params)
     alpha = matrix(a$x[1:P],p,r)
     status = a$status
   }
 
   # Call GLPK's LP solver, store results
   else {
-    a = Rglpk::Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                              rhs=model$rhs, bounds=model$bounds, control=params)
+    a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
+                       rhs=model$rhs, bounds=model$bounds, control=params)
     alpha = matrix(a$solution[1:P],p,r)
     status = a$status
   }
@@ -395,7 +389,8 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
 #' given tau values.
 #'
 #' @param object The \code{quantile_ensemble} object.
-#' @param ... further arguments
+#' @param ... Additional arguments (not used).
+#
 #' @method coef quantile_ensemble
 #' @export
 
@@ -423,18 +418,20 @@ coef.quantile_ensemble = function(object, ...) {
 #'   Natural for count data. Default is FALSE.
 #' @param round Should the returned quantile estimates be rounded? Natural for
 #'   count data. Default is FALSE.
+#' @param ... Additional arguments (not used).
+#' 
 #' @method predict quantile_ensemble
 #' @export
-predict.quantile_ensemble = function(object, newq, s=NULL, sort=TRUE, iso=FALSE,
+
+predict.quantile_ensemble = function(object, newq, s=NULL, sort=TRUE, iso=FALSE,  
                                      nonneg=FALSE, round=FALSE, ...) {
-    obj  <- object
   # Set up some basics
   n0 = dim(newq)[1]
   p = dim(newq)[2]
   r = dim(newq)[3]
 
   # Add an all 1s matrix to newq, if we need to
-  if (obj$intercept) {
+  if (object$intercept) {
     a = array(NA, dim=c(n0,p+1,r))
     for (k in 1:r) a[,,k] = cbind(rep(1,n0), newq[,,k])
     newq = a
@@ -443,7 +440,7 @@ predict.quantile_ensemble = function(object, newq, s=NULL, sort=TRUE, iso=FALSE,
 
   # Make predictions
   z = matrix(NA, nrow=n0, ncol=r)
-  alpha = matrix(obj$alpha, nrow=p, ncol=r)
+  alpha = matrix(object$alpha, nrow=p, ncol=r)
   for (i in 1:n0) {
     mat = t(newq[i,,]) %*% alpha
     if (r == 1) z[i,] = mat

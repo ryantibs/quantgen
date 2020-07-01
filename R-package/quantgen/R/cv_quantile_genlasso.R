@@ -45,7 +45,7 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                 params=list(), transform=NULL, inv_trans=NULL,
                                 jitter=NULL, verbose=FALSE, sort=FALSE,
                                 iso=FALSE, nonneg=FALSE, round=FALSE) {
-  # Check arguments
+  # Set up some basics
   n = length(y); p = ncol(x); m = nrow(d)
   if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
@@ -125,14 +125,15 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
 #' @param x The \code{cv_quantile_genlasso} object.
 #' @param legend_pos Position for the legend; default is "topleft"; use NULL to
 #'   suppress the legend.
+#' @param ... Additional arguments (not used).
+#' 
 #' @method plot cv_quantile_genlasso
 #' @export
 
 plot.cv_quantile_genlasso = function(x, legend_pos="topleft", ...) {
-    obj  <-  x
-  matplot(obj$lambda, obj$cv_mat, type="o", lty=1:5, col=1:6, pch=20, log="x",
+  matplot(x$lambda, x$cv_mat, type="o", lty=1:5, col=1:6, pch=20, log="x",
           ylab="CV error", xlab="Lambda")
-  if (!is.null(legend_pos)) legend(legend_pos, legend=paste("tau =", obj$tau),
+  if (!is.null(legend_pos)) legend(legend_pos, legend=paste("tau =", x$tau),
                                    lty=1:5, col=1:6)
 }
 
@@ -150,10 +151,11 @@ plot.cv_quantile_genlasso = function(x, legend_pos="topleft", ...) {
 #' @method predict cv_quantile_genlasso
 #' @export
 
-predict.cv_quantile_genlasso = function(object, newx, s=NULL, sort=FALSE, iso=FALSE,
-                                        nonneg=FALSE, round=FALSE, ...) {
-  return(predict(object$qgl_obj, newx=newx, s=s, sort=sort, iso=iso, nonneg=nonneg,
-                 round=round))
+predict.cv_quantile_genlasso = function(object, newx, s=NULL, sort=FALSE,
+                                        iso=FALSE, nonneg=FALSE, round=FALSE,
+                                        ...) {
+  return(predict(object$qgl_obj, newx=newx, s=s, sort=sort, iso=iso,
+                 nonneg=nonneg, round=round))
 }
 
 ##############################
