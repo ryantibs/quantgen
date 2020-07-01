@@ -11,5 +11,6 @@ License: GPL-2
 RoxygenNote: 7.1.0
 Imports: 
     Matrix,
-    gurobi,
     Rglpk
+Suggests: 
+    gurobi

@@ -101,7 +101,6 @@
 #'
 #' @importFrom graphics legend matplot
 #' @importFrom  stats approx coef isoreg median predict qnorm runif sd splinefun
-#' @importFrom gurobi gurobi
 #' @importFrom Rglpk Rglpk_solve_LP
 #' @importFrom Matrix Matrix Diagonal
 #' @author Ryan Tibshirani
@@ -162,6 +161,7 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
                                 lp_solver="gurobi", params=list(),
                                 warm_starts=TRUE, time_limit=time_limit,
                                 jitter=NULL, verbose=FALSE) {
+
   # Set up some basic objects that we will need
   n = nrow(x); p = ncol(x); m = nrow(d)
   Inn = Diagonal(n); Imm = Diagonal(m)
@@ -171,8 +171,9 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
   model$sense = rep(">=", 2*n+2*m)
 
   # Gurobi setup
+  use_gurobi  <- (lp_solver == "gurobi") && (requireNamespace("gurobi", quietly = TRUE))
   # Gurobi setup
-  if (lp_solver == "gurobi") {
+  if (use_gurobi) {
     ## if (!require("gurobi",quietly=TRUE)) {
     ##   stop("Package gurobi not installed (required here)!")
     ## }
@@ -183,7 +184,7 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
   }
 
   # GLPK setup
-  else if (lp_solver == "glpk") {
+  else {
     ## if (!require("Rglpk",quietly=TRUE)) {
     ##   stop("Package Rglpk not installed (required here)!")
     ## }
@@ -227,7 +228,7 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
     model$rhs = c(tau[j]*y, (tau[j]-1)*y, rep(0,2*m))
 
     # Gurobi
-    if (lp_solver == "gurobi") {
+    if (use_gurobi) {
       # Set a warm start, if we're asked to
       if (warm_starts && !is.null(last_sol)) {
         model$start = last_sol
@@ -241,7 +242,7 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
     }
 
     # GLPK
-    else if (lp_solver == "glpk") {
+    else {
       # Call GLPK's LP solver, store results
       a = Rglpk::Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
                          rhs=model$rhs, bounds=model$bounds, control=params)
@@ -441,25 +442,26 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) {
   model$rhs = c(rep(0, 2*m), t(x) %*% v)
 
   # Gurobi
-  if (lp_solver == "gurobi") {
+  use_gurobi  <- (lp_solver == "gurobi") && (requireNamespace("gurobi", quietly = TRUE))
+  if (use_gurobi) {
     ## if (!require("gurobi",quietly=TRUE)) {
     ##   stop("Package gurobi not installed (required here)!")
     ## }
     model$sense = c(rep(">=", 2*m), rep("=", p))
     model$lb = c(rep(-Inf,m), 0)
-    a = gurobi(model=model, params=list(LogToConsole=0))
+    a = gurobi::gurobi(model=model, params=list(LogToConsole=0))
     lambda_max = a$x[m+1]
   }
 
   # GLPK
-  else if (lp_solver == "glpk") {
+  else {
     ## if (!require("Rglpk",quietly=TRUE)) {
     ##   stop("Package Rglpk not installed (required here)!")
     ## }
     model$sense = c(rep(">=", 2*m), rep("==", p))
     model$bounds = list(lower=list(ind=1:m, val=rep(-Inf,m)))
-    a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                       rhs=model$rhs, bounds=model$bounds)
+    a = Rglpk::Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
+                              rhs=model$rhs, bounds=model$bounds)
     lambda_max = a$solution[m+1]
   }
 

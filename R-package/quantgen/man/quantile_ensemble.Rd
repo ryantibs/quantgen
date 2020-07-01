@@ -15,7 +15,7 @@ quantile_ensemble(
   unit_sum = TRUE,
   noncross = TRUE,
   q0 = NULL,
-  lp_solver = "gurobi",
+  lp_solver = c("gurobi", "glpk"),
   time_limit = NULL,
   params = list(),
   verbose = FALSE

@@ -87,14 +87,16 @@
 #'   \eqn{\alpha_{j\ell}}, for all \eqn{k,\ell} that are in the same group
 #'   \eqn{g}.
 #'
+#' @importFrom Rglpk Rglpk_solve_LP
 #' @export
 
 quantile_ensemble = function(qarr, y, tau, weights=NULL,
                              tau_groups=rep(1,length(tau)), intercept=FALSE,
                              nonneg=TRUE, unit_sum=TRUE, noncross=TRUE, q0=NULL,
-                             lp_solver="gurobi", time_limit=NULL, params=list(),
+                             lp_solver=c("gurobi", "glpk"), time_limit=NULL, params=list(),
                              verbose=FALSE) {
   # Set up some basics
+  lp_solver <- match.arg(lp_solver)
   n = dim(qarr)[1]
   p = dim(qarr)[2]
   r = dim(qarr)[3]
@@ -135,7 +137,7 @@ quantile_ensemble = function(qarr, y, tau, weights=NULL,
 
 quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
                                    nonneg=TRUE, unit_sum=TRUE,
-                                   lp_solver="gurobi", time_limit=NULL,
+                                   lp_solver=c("gurobi", "glpk"), time_limit=NULL,
                                    params=list(), verbose=FALSE) {
   # Set up some basic objects that we will need
   n = dim(qarr)[1]
@@ -144,8 +146,9 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
   INN = Diagonal(N)
   model = list()
 
- # Gurobi setup
-  if (lp_solver == "gurobi") {
+  # Gurobi setup
+  use_gurobi  <- (lp_solver == "gurobi") && (requireNamespace("gurobi", quietly = TRUE))
+  if (use_gurobi) {
     ## if (!require("gurobi",quietly=TRUE)) {
     ##   stop("Package gurobi not installed (required here)!")
     ## }
@@ -156,7 +159,7 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
   }
 
   # GLPK setup
-  else if (lp_solver == "glpk") {
+  else {
     ## if (!require("Rglpk",quietly=TRUE)) {
     ##   stop("Package Rglpk not installed (required here)!")
     ## }
@@ -198,28 +201,33 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
 
   # Remove nonnegativity constraint on alpha, if we're asked to
   if (!nonneg) {
-    if (lp_solver == "gurobi") model$lb = c(rep(-Inf,p), rep(0,N))
-    if (lp_solver == "glpk") model$bounds = list(lower=list(ind=1:p,
-                                                            val=rep(-Inf,p)))
+      if (use_gurobi) {
+          model$lb = c(rep(-Inf,p), rep(0,N))
+      } else {
+          model$bounds = list(lower=list(ind=1:p, val=rep(-Inf,p)))
+      }
   }
 
   # Remove nonnegativity constraint on intercept, if needed
   if (intercept && nonneg) {
-    if (lp_solver == "gurobi") model$lb = c(-Inf, rep(0,p-1+N))
-    if (lp_solver == "glpk") model$bounds = list(lower=list(ind=1, val=-Inf))
+      if (use_gurobi) {
+          model$lb = c(-Inf, rep(0,p-1+N))
+      } else {
+          model$bounds = list(lower=list(ind=1, val=-Inf))
+      }
   }
 
   # Call Gurobi's LP solver, store results
-  if (lp_solver == "gurobi") {
-    a = gurobi(model=model, params=params)
+  if (use_gurobi) {
+    a = gurobi::gurobi(model=model, params=params)
     alpha = a$x[1:p]
     status = a$status
   }
 
   # Call GLPK's LP solver, store results
-  else if (lp_solver == "glpk") {
-    a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                       rhs=model$rhs, bounds=model$bounds, control=params)
+  else {
+    a = Rglpk::Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
+                               rhs=model$rhs, bounds=model$bounds, control=params)
     alpha = a$solution[1:p]
     status = a$status
   }
@@ -243,7 +251,8 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   model = list()
 
  # Gurobi setup
-  if (lp_solver == "gurobi") {
+  use_gurobi  <- (lp_solver == "gurobi") && (requireNamespace("gurobi", quietly = TRUE))
+  if (use_gurobi) {
     ## if (!require("gurobi",quietly=TRUE)) {
     ##   stop("Package gurobi not installed (required here)!")
     ## }
@@ -254,7 +263,7 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   }
 
   # GLPK setup
-  else if (lp_solver == "glpk") {
+  else {
     ## if (!require("Rglpk",quietly=TRUE)) {
     ##   stop("Package Rglpk not installed (required here)!")
     ## }
@@ -319,16 +328,21 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
 
   # Remove nonnegativity constraint on alpha, if we're asked to
   if (!nonneg) {
-    if (lp_solver == "gurobi") model$lb = c(rep(-Inf,P), rep(0,N))
-    if (lp_solver == "glpk") model$bounds = list(lower=list(ind=1:P,
-                                                            val=rep(-Inf,P)))
+      if (use_gurobi) {
+          model$lb = c(rep(-Inf,P), rep(0,N))
+      } else {
+          model$bounds = list(lower=list(ind=1:P, val=rep(-Inf,P)))
+      }
   }
 
   # Remove nonnegativity constraint on intercepts, if needed
   if (intercept && nonneg) {
-    if (lp_solver == "gurobi") model$lb = c(rep(c(-Inf, rep(0,p-1)), r), rep(0,N))
-    if (lp_solver == "glpk") model$bounds = list(lower=list(ind=(0:(r-1))*p + 1,
-                                                            val=rep(-Inf,r)))
+      if (use_gurobi) {
+          model$lb = c(rep(c(-Inf, rep(0,p-1)), r), rep(0,N))
+      } else {
+          model$bounds = list(lower=list(ind=(0:(r-1))*p + 1, val=rep(-Inf,r)))
+      }
+
   }
 
   # Noncrossing constraints, if we're asked to
@@ -355,16 +369,16 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   }
 
   # Call Gurobi's LP solver, store results
-  if (lp_solver == "gurobi") {
-    a = gurobi(model=model, params=params)
+  if (use_gurobi) {
+    a = gurobi::gurobi(model=model, params=params)
     alpha = matrix(a$x[1:P],p,r)
     status = a$status
   }
 
   # Call GLPK's LP solver, store results
-  else if (lp_solver == "glpk") {
-    a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                       rhs=model$rhs, bounds=model$bounds, control=params)
+  else {
+    a = Rglpk::Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
+                              rhs=model$rhs, bounds=model$bounds, control=params)
     alpha = matrix(a$solution[1:P],p,r)
     status = a$status
   }
