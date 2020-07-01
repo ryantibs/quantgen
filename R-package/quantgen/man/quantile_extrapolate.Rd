@@ -4,12 +4,25 @@
 \alias{quantile_extrapolate}
 \title{Quantile extrapolater}
 \usage{
-quantile_extrapolate(tau, qvals, tau_out = c(0.01, 0.025, seq(0.05, 0.95,
-  by = 0.05), 0.975, 0.99), sort = TRUE, iso = FALSE, nonneg = FALSE,
-  round = FALSE, qfun_left = qnorm, qfun_right = qnorm,
-  n_tau_left = 1, n_tau_right = 1, middle = c("cubic", "linear"),
-  param0 = NULL, param1 = NULL, grid_size = 1000, tol = 0.01,
-  max_iter = 10)
+quantile_extrapolate(
+  tau,
+  qvals,
+  tau_out = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
+  sort = TRUE,
+  iso = FALSE,
+  nonneg = FALSE,
+  round = FALSE,
+  qfun_left = qnorm,
+  qfun_right = qnorm,
+  n_tau_left = 1,
+  n_tau_right = 1,
+  middle = c("cubic", "linear"),
+  param0 = NULL,
+  param1 = NULL,
+  grid_size = 1000,
+  tol = 0.01,
+  max_iter = 10
+)
 }
 \arguments{
 \item{tau}{Vector of quantile levels. Assumed to be distinct, and sorted in 

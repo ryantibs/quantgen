@@ -4,11 +4,26 @@
 \alias{quantile_lasso}
 \title{Quantile lasso.}
 \usage{
-quantile_lasso(x, y, tau, lambda, weights = NULL, no_pen_vars = c(),
-  intercept = TRUE, standardize = TRUE, noncross = FALSE,
-  x0 = NULL, lp_solver = c("gurobi", "glpk"), time_limit = NULL,
-  warm_starts = TRUE, params = list(), transform = NULL,
-  inv_trans = NULL, jitter = NULL, verbose = FALSE)
+quantile_lasso(
+  x,
+  y,
+  tau,
+  lambda,
+  weights = NULL,
+  no_pen_vars = c(),
+  intercept = TRUE,
+  standardize = TRUE,
+  noncross = FALSE,
+  x0 = NULL,
+  lp_solver = c("gurobi", "glpk"),
+  time_limit = NULL,
+  warm_starts = TRUE,
+  params = list(),
+  transform = NULL,
+  inv_trans = NULL,
+  jitter = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{Matrix of predictors. If sparse, then passing it an appropriate 

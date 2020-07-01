@@ -15,6 +15,6 @@ get_diff_mat(p, k)
 A sparse matrix of dimension (p - k) x p.
 }
 \description{
-Construct a difference operator, of a given order, for use in trend filtering  
+Construct a difference operator, of a given order, for use in trend filtering
 penalties.
 }

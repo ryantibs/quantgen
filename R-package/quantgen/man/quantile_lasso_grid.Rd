@@ -4,12 +4,26 @@
 \alias{quantile_lasso_grid}
 \title{Quantile lasso on a tau by lambda grid}
 \usage{
-quantile_lasso_grid(x, y, tau, lambda = NULL, nlambda = 30,
-  lambda_min_ratio = 0.001, weights = NULL, no_pen_vars = c(),
-  intercept = TRUE, standardize = TRUE, lp_solver = c("gurobi",
-  "glpk"), time_limit = NULL, warm_starts = TRUE, params = list(),
-  transform = NULL, inv_trans = NULL, jitter = NULL,
-  verbose = FALSE)
+quantile_lasso_grid(
+  x,
+  y,
+  tau,
+  lambda = NULL,
+  nlambda = 30,
+  lambda_min_ratio = 0.001,
+  weights = NULL,
+  no_pen_vars = c(),
+  intercept = TRUE,
+  standardize = TRUE,
+  lp_solver = c("gurobi", "glpk"),
+  time_limit = NULL,
+  warm_starts = TRUE,
+  params = list(),
+  transform = NULL,
+  inv_trans = NULL,
+  jitter = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{nlambda}{Number of lambda values to consider, for each quantile

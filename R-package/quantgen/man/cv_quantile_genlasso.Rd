@@ -4,13 +4,32 @@
 \alias{cv_quantile_genlasso}
 \title{Cross-validation for quantile generalized lasso}
 \usage{
-cv_quantile_genlasso(x, y, d, tau, lambda = NULL, nlambda = 30,
-  lambda_min_ratio = 0.001, weights = NULL, nfolds = 5,
-  train_test_inds = NULL, intercept = TRUE, standardize = TRUE,
-  lp_solver = c("gurobi", "glpk"), time_limit = NULL,
-  warm_starts = TRUE, params = list(), transform = NULL,
-  inv_trans = NULL, jitter = NULL, verbose = FALSE, sort = FALSE,
-  iso = FALSE, nonneg = FALSE, round = FALSE)
+cv_quantile_genlasso(
+  x,
+  y,
+  d,
+  tau,
+  lambda = NULL,
+  nlambda = 30,
+  lambda_min_ratio = 0.001,
+  weights = NULL,
+  nfolds = 5,
+  train_test_inds = NULL,
+  intercept = TRUE,
+  standardize = TRUE,
+  lp_solver = c("gurobi", "glpk"),
+  time_limit = NULL,
+  warm_starts = TRUE,
+  params = list(),
+  transform = NULL,
+  inv_trans = NULL,
+  jitter = NULL,
+  verbose = FALSE,
+  sort = FALSE,
+  iso = FALSE,
+  nonneg = FALSE,
+  round = FALSE
+)
 }
 \arguments{
 \item{nfolds}{Number of cross-validation folds. Default is 5.}
@@ -29,7 +48,7 @@ is NULL; if specified, takes priority over \code{nfolds}.}
 A list with the following components:
   \itemize{
   \item qgl_obj: a \code{quantile_genlasso} object obtained by fitting on the
-  full training set, at all quantile levels and their corresponding optimal  
+  full training set, at all quantile levels and their corresponding optimal
   lambda values
   \item cv_mat: a matrix of cross-validation errors (as measured by quantile
   loss), of dimension (number of tuning parameter values) x (number of
@@ -39,8 +58,8 @@ A list with the following components:
   }
 }
 \description{
-Run cross-validation for the quantile generalized lasso on a tau by lambda 
-grid. For each tau, the lambda value minimizing the cross-validation error is 
+Run cross-validation for the quantile generalized lasso on a tau by lambda
+grid. For each tau, the lambda value minimizing the cross-validation error is
 reported.
 }
 \details{

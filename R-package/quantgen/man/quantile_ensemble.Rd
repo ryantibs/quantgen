@@ -4,13 +4,25 @@
 \alias{quantile_ensemble}
 \title{Quantile ensemble}
 \usage{
-quantile_ensemble(qarr, y, tau, weights = NULL, tau_groups = rep(1,
-  length(tau)), intercept = FALSE, nonneg = TRUE, unit_sum = TRUE,
-  noncross = TRUE, q0 = NULL, lp_solver = "gurobi",
-  time_limit = NULL, params = list(), verbose = FALSE)
+quantile_ensemble(
+  qarr,
+  y,
+  tau,
+  weights = NULL,
+  tau_groups = rep(1, length(tau)),
+  intercept = FALSE,
+  nonneg = TRUE,
+  unit_sum = TRUE,
+  noncross = TRUE,
+  q0 = NULL,
+  lp_solver = c("gurobi", "glpk"),
+  time_limit = NULL,
+  params = list(),
+  verbose = FALSE
+)
 }
 \arguments{
-\item{qarr}{Array of predicted quantiles, of dimension (number of prediction 
+\item{qarr}{Array of predicted quantiles, of dimension (number of prediction
 points) x (number or ensemble components) x (number of quantile levels).}
 
 \item{y}{Vector of responses (whose quantiles are being predicted by
@@ -25,7 +37,7 @@ observation.}
 
 \item{tau_groups}{Vector of group labels, having the same length as
 \code{tau}. Common labels indicate that the ensemble weights for the
-corresponding quantile levels should be tied together. Default is 
+corresponding quantile levels should be tied together. Default is
 \code{rep(1,length(tau))}, which means that a common set of ensemble
 weights should be used across all levels. See details.}
 
@@ -58,9 +70,9 @@ time.}
 
 \item{params}{A list of control parameters to pass to Gurobi or GLPK. Default
 is \code{list()} which means no additional parameters are passed. For
-example: with Gurobi, we can use \code{list(Threads=4)} to specify that  
+example: with Gurobi, we can use \code{list(Threads=4)} to specify that
 Gurobi should use 4 threads when available. (Note that if a time limit is
-specified through this \code{params} list, then its value will be overriden 
+specified through this \code{params} list, then its value will be overriden
 by the last argument \code{time_limit}, assuming the latter is not NULL.)}
 
 \item{verbose}{Should progress be printed out to the console? Default is
@@ -75,7 +87,7 @@ A list with the following components:
   ensemble components) x (number of quantile levels)
   \item tau: vector of quantile levels used
   \item weights, tau_groups, ..., params: values of these other arguments
-  used in the function call  
+  used in the function call
   }
 }
 \description{
@@ -84,9 +96,9 @@ Fit ensemble weights, given a set of quantile predictions.
 \details{
 This function solves the following quantile ensemble optimization
   problem, over quantile levels \eqn{\tau_k, k=1,\ldots,r}:
-  \deqn{\mathop{\mathrm{minimize}}_{\alpha_j, j=1,\ldots,p} \; \sum_{k=1}^r 
+  \deqn{\mathop{\mathrm{minimize}}_{\alpha_j, j=1,\ldots,p} \; \sum_{k=1}^r
   \sum_{i=1}^n w_i \psi_{\tau_k} \bigg(y_i - \sum_{j=1}^p \alpha_j q_{ijk}
-  \bigg)} \deqn{\mathrm{subject \; to} \;\; \sum_{j=1}^p \alpha_j = 1, \; 
+  \bigg)} \deqn{\mathrm{subject \; to} \;\; \sum_{j=1}^p \alpha_j = 1, \;
   \alpha_j \geq 0, \; j=1,\ldots,p}
   for a response vector \eqn{y} and quantile array \eqn{q}, where
   \eqn{q_{ijk}} is an estimate of the quantile of \eqn{y_i} at the level
@@ -94,11 +106,11 @@ This function solves the following quantile ensemble optimization
   \eqn{\psi_\tau(v) = \max\{\tau v, (\tau-1) v\}} is the "pinball" or "tilted
   \eqn{\ell_1}" loss. A more advanced version allows us to estimate a
   separate ensemble weight \eqn{\alpha_{jk}} per component method \eqn{j},
-  per quantile level \eqn{k}: 
-  \deqn{\mathop{\mathrm{minimize}}{\alpha_{jk}, j=1,\ldots,p, k=1,\ldots,r} 
+  per quantile level \eqn{k}:
+  \deqn{\mathop{\mathrm{minimize}}{\alpha_{jk}, j=1,\ldots,p, k=1,\ldots,r}
   \; \sum_{k=1}^r \sum_{i=1}^n w_i \psi_{\tau_k} \bigg(y_i - \sum_{j=1}^p
-  \alpha_{jk} q_{ijk} \bigg)} \deqn{\mathrm{subject \; to} \;\; 
-  \sum_{j=1}^p \alpha_{jk} = 1, \; k=1,\ldots,r, \; 
+  \alpha_{jk} q_{ijk} \bigg)} \deqn{\mathrm{subject \; to} \;\;
+  \sum_{j=1}^p \alpha_{jk} = 1, \; k=1,\ldots,r, \;
   \alpha_{jk} \geq 0, \; j=1,\ldots,p, \; k=1,\ldots,r}
   As a form of regularization, we can additionally incorporate noncrossing
   constraints into the above optimization, which take the form:

@@ -4,10 +4,10 @@
 \alias{plot.cv_quantile_genlasso}
 \title{Plot function for quantile_genlasso object}
 \usage{
-\method{plot}{cv_quantile_genlasso}(obj, legend_pos = "topleft")
+\method{plot}{cv_quantile_genlasso}(x, legend_pos = "topleft", ...)
 }
 \arguments{
-\item{obj}{The \code{cv_quantile_genlasso} object.}
+\item{x}{The \code{cv_quantile_genlasso} object.}
 
 \item{legend_pos}{Position for the legend; default is "topleft"; use NULL to
 suppress the legend.}

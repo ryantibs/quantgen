@@ -4,21 +4,28 @@
 \alias{predict.quantile_genlasso_grid}
 \title{Predict function for quantile_genlasso_grid object}
 \usage{
-\method{predict}{quantile_genlasso_grid}(obj, newx, sort = FALSE,
-  iso = FALSE, nonneg = FALSE, round = FALSE)
+\method{predict}{quantile_genlasso_grid}(
+  object,
+  newx,
+  sort = FALSE,
+  iso = FALSE,
+  nonneg = FALSE,
+  round = FALSE,
+  ...
+)
 }
 \description{
 Predict the conditional quantiles at a new set of predictor variables, using
 the generalized lasso coefficients at given tau or lambda values.
 }
 \details{
-This function operates as in the \code{predict.quantile_genlasso} 
+This function operates as in the \code{predict.quantile_genlasso}
   function for a \code{quantile_genlasso} object, but with a few key
   differences. First, the output is reformatted so that it is an array of
   dimension (number of prediction points) x (number of tuning parameter
   values) x (number of quantile levels). This output is generated from the
   full set of tau and lambda pairs stored in the given
-  \code{quantile_genlasso_grid} object \code{obj} (selecting a subset is 
+  \code{quantile_genlasso_grid} object \code{obj} (selecting a subset is
   disallowed). Second, the arguments \code{sort} and \code{iso} operate on
   the appropriate slices of this array: for a fixed lambda value, we sort or
   run isotonic regression across all tau values.

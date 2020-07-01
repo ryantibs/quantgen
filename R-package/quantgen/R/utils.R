@@ -56,7 +56,7 @@ setup_xyd = function(x, y, d, intercept=TRUE, standardize=TRUE, transform=NULL) 
     x = scale(x,bx,sx)
   }
 
-  # Add all 1s column to x, and all 0s column to d, if we need to 
+  # Add all 1s column to x, and all 0s column to d, if we need to
   if (intercept) {
     x = cbind(rep(1,n), x)
     d = cbind(rep(0,m), d)
@@ -71,7 +71,7 @@ setup_xyd = function(x, y, d, intercept=TRUE, standardize=TRUE, transform=NULL) 
 
 #' Quantile loss
 #'
-#' Compute the quantile (tilted absolute) loss for a single tau value. 
+#' Compute the quantile (tilted absolute) loss for a single tau value.
 #'
 #' @export
 
@@ -82,13 +82,13 @@ quantile_loss = function(yhat, y, tau) {
 
 #' Convenience functions for log padding
 #'
-#' Functions to map \eqn{y \mapsto \log(a+y)} and \eqn{x \mapsto \exp(x)-a}.   
+#' Functions to map \eqn{y \mapsto \log(a+y)} and \eqn{x \mapsto \exp(x)-a}.
 #'
 #' @export
 
 log_pad = function(a=1) function(y) log(a+y)
 
-#' @rdname log_pad 
+#' @rdname log_pad
 #' @export
 inv_log_pad = function(a=1) function(x) exp(x)-a
 
@@ -102,19 +102,19 @@ unif_jitter = function(a=0, b=0.01) function(n) runif(n,a,b)
 
 #' Difference matrix
 #'
-#' Construct a difference operator, of a given order, for use in trend filtering  
-#' penalties.  
+#' Construct a difference operator, of a given order, for use in trend filtering
+#' penalties.
 #'
 #' @param p Dimension (number of columns) of the difference matrix.
 #' @param k Order of the difference matrix.
 #'
 #' @return A sparse matrix of dimension (p - k) x p.
-#'
+#' @importFrom Matrix bandSparse Diagonal bdiag
 #' @export
 
 get_diff_mat = function(p, k) {
   I = Diagonal(p)
-  D = bandSparse(p, k=c(-1,0), diag=list(rep(-1,p-1), rep(1,p)))
+  D = bandSparse(p, k=c(-1,0), diagonals=list(rep(-1,p-1), rep(1,p)))
   B = I
   for (i in Seq(1,k)) {
     B = bdiag(I[Seq(1,i-1),Seq(1,i-1)], D[1:(p-i+1),1:(p-i+1)]) %*% B

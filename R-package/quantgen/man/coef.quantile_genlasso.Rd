@@ -4,19 +4,22 @@
 \alias{coef.quantile_genlasso}
 \title{Coef function for quantile_genlasso object}
 \usage{
-\method{coef}{quantile_genlasso}(obj, s = NULL)
+\method{coef}{quantile_genlasso}(object, s = NULL, ...)
 }
 \arguments{
-\item{obj}{The \code{quantile_genlasso} object.}
+\item{object}{The \code{quantile_genlasso} object.}
 
 \item{s}{Vector of integers specifying the tau and lambda values to consider
-for coefficients; for each \code{i} in this vector, coefficients are 
+for coefficients; for each \code{i} in this vector, coefficients are
 returned at quantile level \code{tau[i]} and tuning parameter value
 \code{lambda[i]}, according to the \code{tau} and \code{lambda} vectors
 stored in the given \code{quantile_genlasso} object \code{obj}. (Said
 differently, \code{s} specifies the columns of \code{obj$beta} to retrieve
 for the coefficients.)  Default is NULL, which means that all tau and
 lambda values will be considered.}
+
+\item{...}{further arguments
+#'}
 }
 \description{
 Retrieve generalized lasso coefficients for estimating the conditional

@@ -4,12 +4,26 @@
 \alias{refit_quantile_lasso}
 \title{Refit function for cv_quantile_lasso object}
 \usage{
-refit_quantile_lasso(obj, x, y, tau_new = c(0.01, 0.025, seq(0.05, 0.95,
-  by = 0.05), 0.975, 0.99), weights = NULL, no_pen_vars = NULL,
-  intercept = TRUE, standardize = TRUE, noncross = FALSE,
-  x0 = NULL, lp_solver = NULL, time_limit = NULL,
-  warm_starts = NULL, params = NULL, transform = NULL,
-  inv_trans = NULL, jitter = NULL, verbose = FALSE)
+refit_quantile_lasso(
+  obj,
+  x,
+  y,
+  tau_new = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
+  weights = NULL,
+  no_pen_vars = NULL,
+  intercept = TRUE,
+  standardize = TRUE,
+  noncross = FALSE,
+  x0 = NULL,
+  lp_solver = NULL,
+  time_limit = NULL,
+  warm_starts = NULL,
+  params = NULL,
+  transform = NULL,
+  inv_trans = NULL,
+  jitter = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{obj}{The \code{cv_quantile_lasso} object to start from.}

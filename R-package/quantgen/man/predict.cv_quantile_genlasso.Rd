@@ -4,8 +4,16 @@
 \alias{predict.cv_quantile_genlasso}
 \title{Predict function for cv_quantile_genlasso object}
 \usage{
-\method{predict}{cv_quantile_genlasso}(obj, newx, s = NULL,
-  sort = FALSE, iso = FALSE, nonneg = FALSE, round = FALSE)
+\method{predict}{cv_quantile_genlasso}(
+  object,
+  newx,
+  s = NULL,
+  sort = FALSE,
+  iso = FALSE,
+  nonneg = FALSE,
+  round = FALSE,
+  ...
+)
 }
 \description{
 Predict the conditional quantiles at a new set of predictor variables, using
@@ -13,6 +21,6 @@ the generalized lasso coefficients tuned by cross-validation.
 }
 \details{
 This just calls the \code{predict} function on the
-  \code{quantile_genlasso} that is stored within the given 
+  \code{quantile_genlasso} that is stored within the given
   \code{cv_quantile_genlasso} object.
 }

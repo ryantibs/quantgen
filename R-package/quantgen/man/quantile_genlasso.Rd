@@ -4,21 +4,36 @@
 \alias{quantile_genlasso}
 \title{Quantile generalized lasso}
 \usage{
-quantile_genlasso(x, y, d, tau, lambda, weights = NULL,
-  intercept = TRUE, standardize = TRUE, noncross = FALSE,
-  x0 = NULL, lp_solver = c("gurobi", "glpk"), time_limit = NULL,
-  warm_starts = TRUE, params = list(), transform = NULL,
-  inv_trans = NULL, jitter = NULL, verbose = FALSE)
+quantile_genlasso(
+  x,
+  y,
+  d,
+  tau,
+  lambda,
+  weights = NULL,
+  intercept = TRUE,
+  standardize = TRUE,
+  noncross = FALSE,
+  x0 = NULL,
+  lp_solver = c("gurobi", "glpk"),
+  time_limit = NULL,
+  warm_starts = TRUE,
+  params = list(),
+  transform = NULL,
+  inv_trans = NULL,
+  jitter = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{x}{Matrix of predictors. If sparse, then passing it an appropriate 
+\item{x}{Matrix of predictors. If sparse, then passing it an appropriate
 sparse \code{Matrix} class can greatly help optimization.}
 
 \item{y}{Vector of responses.}
 
 \item{d}{Matrix defining the generalized lasso penalty; see details. If
-sparse, then passing it an appropriate sparse \code{Matrix} class can 
-greatly help optimization. A convenience function \code{get_diff_mat} for 
+sparse, then passing it an appropriate sparse \code{Matrix} class can
+greatly help optimization. A convenience function \code{get_diff_mat} for
 constructing trend filtering penalties is provided.}
 
 \item{tau, lambda}{Vectors of quantile levels and tuning parameter values. If
@@ -58,14 +73,14 @@ Gurobi or GLPK to solve any single quantile generalized lasso problem (for
 a single tau and lambda value). Default is NULL, which means unlimited
 time.}
 
-\item{warm_starts}{Should warm starts be used in the LP solver (from one LP 
+\item{warm_starts}{Should warm starts be used in the LP solver (from one LP
 solve to the next)? Only supported for Gurobi.}
 
 \item{params}{A list of control parameters to pass to Gurobi or GLPK. Default
 is \code{list()} which means no additional parameters are passed. For
-example: with Gurobi, we can use \code{list(Threads=4)} to specify that  
+example: with Gurobi, we can use \code{list(Threads=4)} to specify that
 Gurobi should use 4 threads when available. (Note that if a time limit is
-specified through this \code{params} list, then its value will be overriden 
+specified through this \code{params} list, then its value will be overriden
 by the last argument \code{time_limit}, assuming the latter is not NULL.)}
 
 \item{transform, inv_trans}{The first is a function to transform y before
@@ -98,7 +113,7 @@ A list with the following components:
   solver, of length = (number of quantile levels)
   \item tau, lambda: vectors of tau and lambda values used
   \item weights, intercept, ..., jitter: values of these other arguments
-  used  in the function call  
+  used  in the function call
   }
 }
 \description{
@@ -106,18 +121,18 @@ Compute quantile generalized lasso solutions.
 }
 \details{
 This function solves the quantile generalized lasso problem, for
-  each pair of quantile level \eqn{\tau} and tuning parameter \eqn{\lambda}: 
+  each pair of quantile level \eqn{\tau} and tuning parameter \eqn{\lambda}:
   \deqn{\mathop{\mathrm{minimize}}_{\beta_0,\beta} \;
-  \sum_{i=1}^n w_i \psi_\tau(y_i-\beta_0-x_i^T\beta) + \lambda \|D\beta\|_1}   
+  \sum_{i=1}^n w_i \psi_\tau(y_i-\beta_0-x_i^T\beta) + \lambda \|D\beta\|_1}
   for a response vector \eqn{y} with components \eqn{y_i}, predictor matrix
   \eqn{X} with rows \eqn{x_i}, and penalty matrix \eqn{D}. Here
-  \eqn{\psi_\tau(v) = \max\{\tau v, (\tau-1) v\}} is the  
+  \eqn{\psi_\tau(v) = \max\{\tau v, (\tau-1) v\}} is the
   "pinball" or "tilted \eqn{\ell_1}" loss. When noncrossing constraints are
   applied, we instead solve one big joint optimization, over all quantile
-  levels and tuning parameter values: 
+  levels and tuning parameter values:
   \deqn{\mathop{\mathrm{minimize}}_{\beta_{0k}, \beta_k, k=1,\ldots,r} \;
   \sum_{k=1}^r \bigg(\sum_{i=1}^n w_i \psi_{\tau_k}(y_i-\beta_{0k}-
-  x_i^T\beta_k) + \lambda_k \|D\beta_k\|_1\bigg)} 
+  x_i^T\beta_k) + \lambda_k \|D\beta_k\|_1\bigg)}
   \deqn{\mathrm{subject \; to} \;\; \beta_{0k}+x^T\beta_k \leq
   \beta_{0,k+1}+x^T\beta_{k+1} \;\; k=1,\ldots,r-1, \; x \in \mathcal{X}}
   where the quantile levels \eqn{\tau_k, k=1,\ldots,r} are assumed to be in
@@ -125,7 +140,7 @@ This function solves the quantile generalized lasso problem, for
   which to enforce the noncrossing constraints.
 
   Either problem is readily converted into a linear program (LP), and solved
-  using either Gurobi (which is free for academic use, and generally fast) or 
+  using either Gurobi (which is free for academic use, and generally fast) or
   GLPK (which free for everyone, but slower).
 }
 \author{

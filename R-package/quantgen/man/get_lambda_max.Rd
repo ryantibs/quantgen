@@ -4,8 +4,7 @@
 \alias{get_lambda_max}
 \title{Lambda max for quantile generalized lasso}
 \usage{
-get_lambda_max(x, y, d, weights = NULL, lp_solver = c("gurobi",
-  "glpk"))
+get_lambda_max(x, y, d, weights = NULL, lp_solver = c("gurobi", "glpk"))
 }
 \description{
 Compute lambda max for a quantile generalized lasso problem.

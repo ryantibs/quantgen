@@ -4,10 +4,12 @@
 \alias{coef.quantile_ensemble}
 \title{Coef function for quantile_ensemble object}
 \usage{
-\method{coef}{quantile_ensemble}(obj)
+\method{coef}{quantile_ensemble}(object, ...)
 }
 \arguments{
-\item{obj}{The \code{quantile_ensemble} object.}
+\item{object}{The \code{quantile_ensemble} object.}
+
+\item{...}{further arguments}
 }
 \description{
 Retrieve ensemble coefficients for estimating the conditional quantiles at

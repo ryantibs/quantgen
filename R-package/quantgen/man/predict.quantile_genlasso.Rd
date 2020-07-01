@@ -4,20 +4,28 @@
 \alias{predict.quantile_genlasso}
 \title{Predict function for quantile_genlasso object}
 \usage{
-\method{predict}{quantile_genlasso}(obj, newx, s = NULL, sort = FALSE,
-  iso = FALSE, nonneg = FALSE, round = FALSE)
+\method{predict}{quantile_genlasso}(
+  object,
+  newx,
+  s = NULL,
+  sort = FALSE,
+  iso = FALSE,
+  nonneg = FALSE,
+  round = FALSE,
+  ...
+)
 }
 \arguments{
-\item{obj}{The \code{quantile_genlasso} object.}
+\item{object}{The \code{quantile_genlasso} object.}
 
 \item{newx}{Matrix of new predictor variables at which predictions should
 be made.}
 
 \item{s}{Vector of integers specifying the tau and lambda values to consider
-for predictions; for each \code{i} in this vector, predictions are made at  
+for predictions; for each \code{i} in this vector, predictions are made at
 quantile level \code{tau[i]} and tuning parameter value \code{lambda[i]},
-according to the \code{tau} and \code{lambda} vectors stored in the given  
-\code{quantile_genlasso} object \code{obj}. (Said differently, \code{s} 
+according to the \code{tau} and \code{lambda} vectors stored in the given
+\code{quantile_genlasso} object \code{obj}. (Said differently, \code{s}
 specifies the columns of \code{object$beta} to use for the predictions.)
 Default is NULL, which means that all tau and lambda values will be
 considered.}

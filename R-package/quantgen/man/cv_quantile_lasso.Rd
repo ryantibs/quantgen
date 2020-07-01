@@ -4,14 +4,32 @@
 \alias{cv_quantile_lasso}
 \title{Cross-validation for quantile lasso}
 \usage{
-cv_quantile_lasso(x, y, tau, lambda = NULL, nlambda = 30,
-  lambda_min_ratio = 0.001, weights = NULL, no_pen_vars = c(),
-  nfolds = 5, train_test_inds = NULL, intercept = TRUE,
-  standardize = TRUE, lp_solver = c("gurobi", "glpk"),
-  time_limit = NULL, warm_starts = TRUE, params = list(),
-  transform = NULL, inv_trans = NULL, jitter = NULL,
-  verbose = FALSE, sort = FALSE, iso = FALSE, nonneg = FALSE,
-  round = FALSE)
+cv_quantile_lasso(
+  x,
+  y,
+  tau,
+  lambda = NULL,
+  nlambda = 30,
+  lambda_min_ratio = 0.001,
+  weights = NULL,
+  no_pen_vars = c(),
+  nfolds = 5,
+  train_test_inds = NULL,
+  intercept = TRUE,
+  standardize = TRUE,
+  lp_solver = c("gurobi", "glpk"),
+  time_limit = NULL,
+  warm_starts = TRUE,
+  params = list(),
+  transform = NULL,
+  inv_trans = NULL,
+  jitter = NULL,
+  verbose = FALSE,
+  sort = FALSE,
+  iso = FALSE,
+  nonneg = FALSE,
+  round = FALSE
+)
 }
 \arguments{
 \item{nfolds}{Number of cross-validation folds. Default is 5.}
