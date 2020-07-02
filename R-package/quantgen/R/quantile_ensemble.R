@@ -245,7 +245,7 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
 
 quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
                                   intercept=FALSE, nonneg=TRUE, unit_sum=TRUE,
-                                  noncross=FALSE, q0=NULL, lp_solver="gurobi",
+                                  noncross=TRUE, q0=NULL, lp_solver="gurobi",
                                   time_limit=NULL, params=list(),
                                   verbose=FALSE) {
   # Set up some basic objects that we will need
