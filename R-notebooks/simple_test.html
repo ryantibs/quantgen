@@ -410,11 +410,9 @@ summary {
 ##     backsolve</code></pre>
 <pre><code>## Loading required package: regpro</code></pre>
 <pre><code>## Loading required package: denpro</code></pre>
-<pre class="r"><code>library(quantgen)</code></pre>
-<pre><code>## Loading required package: Matrix</code></pre>
-<pre><code>## Loading required package: gurobi</code></pre>
-<pre><code>## Loading required package: slam</code></pre>
-<pre class="r"><code>set.seed(33)
+<pre class="r"><code>library(quantgen)
+
+set.seed(33)
 n = 500
 p = 50
 x = matrix(rnorm(n*p), n, p)
@@ -423,13 +421,12 @@ mu = function(x) x[1] + x[2]
 y = apply(x, 1, mu) + rnorm(n)
 
 tau = 0.8
-lambda = sqrt(get_lambda_max(x, y, Diagonal(p)))
+lambda = sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
 
 # No intercept, no standardize
 a1 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE)
-a2 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver=&quot;glpk&quot;)</code></pre>
-<pre><code>## Using the GLPK callable library version 4.65</code></pre>
-<pre class="r"><code>a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=FALSE)
+a2 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver=&quot;glpk&quot;)
+a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=FALSE)
 max(abs(coef(a1)-coef(a3)))</code></pre>
 <pre><code>## [1] 6.661338e-16</code></pre>
 <pre class="r"><code>max(abs(coef(a2)-coef(a3)))</code></pre>
@@ -488,7 +485,7 @@ mu = function(x) x[1] + x[2]
 y = apply(x, 1, mu) + rnorm(n)
 
 tau = 0.8
-lambda = sqrt(get_lambda_max(x, y, Diagonal(p)))
+lambda = sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
 
 system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, verbose=TRUE))[3]</code></pre>
 <pre><code>## Gurobi Optimizer version 9.0.2 build v9.0.2rc0 (mac64)
@@ -503,10 +500,10 @@ system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE
 ## Concurrent LP optimizer: dual simplex and barrier
 ## Showing barrier log only...
 ## 
-## Presolve time: 1.95s
+## Presolve time: 1.65s
 ## Presolved: 6000 rows, 4000 columns, 4008000 nonzeros
 ## 
-## Ordering time: 0.50s
+## Ordering time: 0.41s
 ## 
 ## Barrier statistics:
 ##  Free vars  : 1000
@@ -520,60 +517,61 @@ system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE
 ##    0   6.85817877e+04  0.00000000e+00  5.63e-01 0.00e+00  2.14e+01    21s
 ##    1   1.78096393e+04  9.49507874e+01  1.05e-01 4.43e-01  2.79e+00    22s
 ##    2   3.44405637e+03  1.59043062e+02  2.01e-03 4.00e-07  3.67e-01    24s
-##    3   1.10149986e+03  4.59573707e+02  0.00e+00 3.55e-07  7.15e-02    26s
-##    4   8.25932552e+02  7.34515386e+02  0.00e+00 5.40e-08  1.02e-02    28s
+##    3   1.10149986e+03  4.59573707e+02  0.00e+00 3.55e-07  7.15e-02    25s
+##    4   8.25932552e+02  7.34515386e+02  0.00e+00 5.40e-08  1.02e-02    27s
 ##    5   7.79189458e+02  7.66561697e+02  0.00e+00 2.53e-08  1.40e-03    29s
-##    6   7.73316411e+02  7.72053902e+02  0.00e+00 7.96e-09  1.40e-04    31s
-##    7   7.72756101e+02  7.72606903e+02  0.00e+00 9.48e-10  1.66e-05    33s
-##    8   7.72689894e+02  7.72676085e+02  0.00e+00 1.23e-10  1.53e-06    35s
-##    9   7.72683892e+02  7.72682719e+02  0.00e+00 1.44e-10  1.30e-07    37s
-##   10   7.72683315e+02  7.72683273e+02  0.00e+00 3.49e-11  4.65e-09    38s
-##   11   7.72683313e+02  7.72683276e+02  3.49e-08 3.15e-11  4.23e-09    40s
-##   12   7.72683311e+02  7.72683278e+02  3.20e-08 2.94e-11  3.65e-09    42s
-##   13   7.72683310e+02  7.72683279e+02  5.38e-08 2.94e-11  3.58e-09    43s
-##   14   7.72683306e+02  7.72683283e+02  5.99e-08 3.07e-11  2.61e-09    45s
-##   15   7.72683305e+02  7.72683285e+02  5.33e-08 2.86e-11  2.27e-09    46s
-##   16   7.72683305e+02  7.72683285e+02  5.84e-08 2.79e-11  2.17e-09    48s
-##   17   7.72683304e+02  7.72683286e+02  6.34e-08 2.78e-11  2.10e-09    50s
+##    6   7.73316411e+02  7.72053902e+02  0.00e+00 7.96e-09  1.40e-04    30s
+##    7   7.72756101e+02  7.72606903e+02  0.00e+00 9.48e-10  1.66e-05    32s
+##    8   7.72689894e+02  7.72676085e+02  0.00e+00 1.23e-10  1.53e-06    34s
+##    9   7.72683892e+02  7.72682719e+02  0.00e+00 1.44e-10  1.30e-07    36s
+##   10   7.72683315e+02  7.72683273e+02  0.00e+00 3.49e-11  4.65e-09    37s
+##   11   7.72683313e+02  7.72683276e+02  3.49e-08 3.15e-11  4.23e-09    39s
+##   12   7.72683311e+02  7.72683278e+02  3.20e-08 2.94e-11  3.65e-09    40s
+##   13   7.72683310e+02  7.72683279e+02  5.38e-08 2.94e-11  3.58e-09    42s
+##   14   7.72683306e+02  7.72683283e+02  5.99e-08 3.07e-11  2.61e-09    43s
+##   15   7.72683305e+02  7.72683285e+02  5.33e-08 2.86e-11  2.27e-09    45s
+##   16   7.72683305e+02  7.72683285e+02  5.84e-08 2.79e-11  2.17e-09    47s
+##   17   7.72683304e+02  7.72683286e+02  6.34e-08 2.78e-11  2.10e-09    48s
 ## 
-## Barrier solved model in 17 iterations and 49.55 seconds
+## Barrier solved model in 17 iterations and 48.13 seconds
 ## Optimal objective 7.72683304e+02
 ## 
 ## Crossover log...
 ## 
-##     1318 DPushes remaining with DInf 0.0000000e+00                50s
-##        0 DPushes remaining with DInf 0.0000000e+00                54s
+##     1318 DPushes remaining with DInf 0.0000000e+00                49s
+##      837 DPushes remaining with DInf 0.0000000e+00                50s
+##        0 DPushes remaining with DInf 0.0000000e+00                52s
 ## 
-##       13 PPushes remaining with PInf 0.0000000e+00                54s
-##        0 PPushes remaining with PInf 0.0000000e+00                54s
+##       13 PPushes remaining with PInf 0.0000000e+00                52s
+##        0 PPushes remaining with PInf 0.0000000e+00                52s
 ## 
-##   Push phase complete: Pinf 0.0000000e+00, Dinf 3.7498105e-11     54s
+##   Push phase complete: Pinf 0.0000000e+00, Dinf 3.7498105e-11     52s
 ## 
 ## Iteration    Objective       Primal Inf.    Dual Inf.      Time
-##      879    7.7268330e+02   0.000000e+00   0.000000e+00     54s
+##      879    7.7268330e+02   0.000000e+00   0.000000e+00     53s
 ## 
 ## Solved with barrier
-## Solved in 879 iterations and 54.30 seconds
+## Solved in 879 iterations and 52.86 seconds
 ## Optimal objective  7.726832954e+02</code></pre>
 <pre><code>## elapsed 
-##  55.533</code></pre>
+##  54.045</code></pre>
 <pre class="r"><code>system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver=&quot;glpk&quot;, verbose=TRUE))[3]</code></pre>
 <pre><code>## GLPK Simplex Optimizer, v4.65
 ## 6000 rows, 4000 columns, 4008000 non-zeros
 ##       0: obj =   0.000000000e+00 inf =   1.389e+03 (2000)
-##     883: obj =   1.222723052e+02 inf =   9.604e+02 (1638) 6
-##    1716: obj =   2.266116222e+02 inf =   8.011e+02 (1426) 5
-##    2373: obj =   3.102195684e+02 inf =   7.143e+02 (1285) 5
-##    2941: obj =   4.069907205e+02 inf =   6.447e+02 (1150) 5
-##    3438: obj =   4.880820330e+02 inf =   5.913e+02 (1039) 4
+##     902: obj =   1.261033175e+02 inf =   9.526e+02 (1628) 6
+##    1805: obj =   2.381462724e+02 inf =   7.873e+02 (1403) 6
+##    2509: obj =   3.293078106e+02 inf =   6.973e+02 (1253) 5
+##    3073: obj =   4.309243311e+02 inf =   6.308e+02 (1117) 4
+##    3503: obj =   4.949763675e+02 inf =   5.856e+02 (1027) 4
 ##    3855: obj =   5.646858109e+02 inf =   5.498e+02 (943) 4
-##    4220: obj =   6.389489521e+02 inf =   5.163e+02 (868) 3
+##    4215: obj =   6.384568325e+02 inf =   5.167e+02 (868) 3
 ##    4517: obj =   6.905085279e+02 inf =   4.876e+02 (821) 3
 ##    4828: obj =   7.415304760e+02 inf =   4.628e+02 (758) 3
 ##    5142: obj =   8.139067694e+02 inf =   4.304e+02 (693) 3
-##    5386: obj =   8.515084531e+02 inf =   4.135e+02 (660) 2
-##    5605: obj =   9.268422707e+02 inf =   3.932e+02 (619) 2
-##    5832: obj =   1.042862491e+03 inf =   3.725e+02 (567) 2
+##    5381: obj =   8.512203322e+02 inf =   4.137e+02 (660) 2
+##    5594: obj =   9.223438979e+02 inf =   3.942e+02 (622) 2
+##    5820: obj =   1.036246205e+03 inf =   3.735e+02 (570) 2
 ##    6057: obj =   1.146800895e+03 inf =   3.544e+02 (528) 3
 ##    6259: obj =   1.195069124e+03 inf =   3.405e+02 (502) 2
 ##    6461: obj =   1.277382530e+03 inf =   3.279e+02 (475) 2
@@ -603,48 +601,49 @@ system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE
 ## * 11232: obj =   1.525762894e+03 inf =   1.686e-12 (993) 2
 ## * 11434: obj =   1.463913401e+03 inf =   1.408e-12 (1000) 2
 ## * 11636: obj =   1.409314079e+03 inf =   1.704e-12 (999) 2
-## * 11845: obj =   1.358258125e+03 inf =   1.385e-12 (994) 2
-## * 12080: obj =   1.289908373e+03 inf =   1.199e-12 (996) 2
-## * 12273: obj =   1.256857383e+03 inf =   1.379e-12 (997) 2
+## * 11854: obj =   1.355401968e+03 inf =   1.384e-12 (995) 2
+## * 12092: obj =   1.287644750e+03 inf =   1.200e-12 (963) 2
+## * 12280: obj =   1.256331078e+03 inf =   1.375e-12 (982) 2
 ## * 12445: obj =   1.243782098e+03 inf =   1.268e-12 (995) 2
 ## * 12647: obj =   1.211280664e+03 inf =   1.350e-12 (985) 2
-## * 12872: obj =   1.169250386e+03 inf =   1.488e-12 (998) 2
-## * 13125: obj =   1.139237730e+03 inf =   1.296e-12 (977) 2
-## * 13310: obj =   1.126685327e+03 inf =   1.229e-12 (996) 2
-## * 13501: obj =   1.111267922e+03 inf =   1.492e-12 (988) 2
-## * 13731: obj =   1.088320696e+03 inf =   1.109e-12 (995) 2
+## * 12873: obj =   1.169228708e+03 inf =   1.487e-12 (999) 2
+## * 13115: obj =   1.140462295e+03 inf =   1.295e-12 (992) 2
+## * 13311: obj =   1.126668427e+03 inf =   1.226e-12 (980) 2
+## * 13495: obj =   1.112303436e+03 inf =   1.500e-12 (995) 2
+## * 13721: obj =   1.089902575e+03 inf =   1.111e-12 (996) 2
 ## * 13962: obj =   1.054739139e+03 inf =   9.044e-13 (999) 3
-## * 14240: obj =   1.030772556e+03 inf =   1.131e-12 (981) 2
-## * 14469: obj =   1.016049089e+03 inf =   1.106e-12 (995) 3
-## * 14772: obj =   9.858314112e+02 inf =   1.318e-12 (993) 3
-## * 15075: obj =   9.588632033e+02 inf =   1.152e-12 (961) 3
-## * 15363: obj =   9.452976244e+02 inf =   8.819e-13 (938) 2
-## * 15581: obj =   9.317317698e+02 inf =   8.600e-13 (994) 3
-## * 15884: obj =   9.078943964e+02 inf =   7.492e-13 (995) 3
-## * 16189: obj =   8.944597565e+02 inf =   8.299e-13 (989) 3
-## * 16492: obj =   8.874951380e+02 inf =   5.972e-13 (969) 3
-## * 16795: obj =   8.753886592e+02 inf =   9.438e-13 (985) 3
-## * 17099: obj =   8.652069469e+02 inf =   5.894e-13 (963) 3
-## * 17406: obj =   8.581129896e+02 inf =   8.439e-13 (988) 3
-## * 17732: obj =   8.439506121e+02 inf =   5.362e-13 (965) 3
-## * 18050: obj =   8.336797856e+02 inf =   4.820e-13 (941) 3
-## * 18335: obj =   8.282757234e+02 inf =   7.278e-13 (942) 3
-## * 18628: obj =   8.216998398e+02 inf =   7.190e-13 (981) 3
-## * 18939: obj =   8.119300243e+02 inf =   3.074e-13 (981) 3
-## * 19322: obj =   8.044890978e+02 inf =   3.667e-13 (991) 3
-## * 19634: obj =   7.985530312e+02 inf =   5.119e-13 (998) 4
-## * 20039: obj =   7.903396082e+02 inf =   3.175e-13 (982) 4
-## * 20446: obj =   7.863028328e+02 inf =   3.296e-13 (934) 4
-## * 20854: obj =   7.798353972e+02 inf =   1.592e-13 (782) 4
-## * 21309: obj =   7.761965778e+02 inf =   3.606e-13 (952) 4
-## * 21769: obj =   7.731926902e+02 inf =   1.911e-13 (654) 5
+## * 14217: obj =   1.031876557e+03 inf =   1.135e-12 (976) 2
+## * 14402: obj =   1.024385546e+03 inf =   1.272e-12 (995) 2
+## * 14657: obj =   1.000785876e+03 inf =   8.950e-13 (991) 2
+## * 14873: obj =   9.769797876e+02 inf =   7.980e-13 (1000) 3
+## * 15177: obj =   9.531756751e+02 inf =   8.555e-13 (996) 3
+## * 15470: obj =   9.402682497e+02 inf =   1.129e-12 (979) 2
+## * 15682: obj =   9.231197149e+02 inf =   9.230e-13 (992) 3
+## * 15985: obj =   9.035252139e+02 inf =   7.041e-13 (994) 3
+## * 16290: obj =   8.915683343e+02 inf =   8.367e-13 (988) 3
+## * 16593: obj =   8.837981706e+02 inf =   9.951e-13 (991) 3
+## * 16896: obj =   8.715755419e+02 inf =   6.362e-13 (989) 3
+## * 17201: obj =   8.626307272e+02 inf =   6.576e-13 (978) 3
+## * 17507: obj =   8.524973194e+02 inf =   8.621e-13 (992) 3
+## * 17811: obj =   8.415590371e+02 inf =   5.521e-13 (988) 3
+## * 18115: obj =   8.321284612e+02 inf =   7.920e-13 (966) 3
+## * 18419: obj =   8.270315644e+02 inf =   6.865e-13 (838) 3
+## * 18722: obj =   8.181030024e+02 inf =   5.810e-13 (994) 3
+## * 19080: obj =   8.077301247e+02 inf =   5.157e-13 (844) 3
+## * 19417: obj =   8.029022858e+02 inf =   6.215e-13 (972) 3
+## * 19735: obj =   7.961194352e+02 inf =   4.079e-13 (999) 4
+## * 20141: obj =   7.892498467e+02 inf =   3.075e-13 (962) 4
+## * 20548: obj =   7.842678865e+02 inf =   4.115e-13 (1000) 4
+## * 20953: obj =   7.789310440e+02 inf =   2.318e-13 (959) 4
+## * 21362: obj =   7.756354078e+02 inf =   2.212e-13 (903) 4
+## * 21857: obj =   7.729514811e+02 inf =   1.681e-13 (739) 4
 ## * 22103: obj =   7.726832954e+02 inf =   2.074e-13 (0) 3
 ## OPTIMAL LP SOLUTION FOUND</code></pre>
 <pre><code>## elapsed 
-## 418.388</code></pre>
+## 424.591</code></pre>
 <pre class="r"><code>system.time(rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=FALSE))[3]</code></pre>
 <pre><code>## elapsed 
-## 122.289</code></pre>
+## 120.834</code></pre>
 </div>
 
 

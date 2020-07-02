@@ -62,7 +62,7 @@ mu = function(x) x[1] + x[2]
 y = apply(x, 1, mu) + rnorm(n)
 
 tau = 0.8
-lambda = sqrt(get_lambda_max(x, y, Diagonal(p)))
+lambda = sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
 
 # No intercept, no standardize
 a1 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE)
@@ -116,7 +116,7 @@ mu = function(x) x[1] + x[2]
 y = apply(x, 1, mu) + rnorm(n)
 
 tau = 0.8
-lambda = sqrt(get_lambda_max(x, y, Diagonal(p)))
+lambda = sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
 
 system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, verbose=TRUE))[3]
 system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="glpk", verbose=TRUE))[3]
