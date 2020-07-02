@@ -115,7 +115,6 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
   n = length(y); p = ncol(x); m = nrow(d)
   if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
-  if (noncross) warning("Noncrossing constraints currently not implemented!")
 
   # Set up x, y, d
   a = setup_xyd(x, y, d, intercept, standardize, transform)
@@ -136,9 +135,10 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
 
   # Solve the quantile generalized lasso LPs
   obj = quantile_genlasso_lp(x=x, y=y, d=d, tau=tau, lambda=lambda,
-                             weights=weights, lp_solver=lp_solver,
-                             time_limit=time_limit, warm_starts=warm_starts,
-                             params=params, jitter=jitter, verbose=verbose)
+                             weights=weights, noncross=noncross, x0=x0,
+                             lp_solver=lp_solver, time_limit=time_limit,
+                             warm_starts=warm_starts, params=params,
+                             jitter=jitter, verbose=verbose)
 
   # Transform beta back to original scale, if we standardized
   if (standardize) {
@@ -157,8 +157,8 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
 
 # Solve quantile generalized lasso problems using an LP solver.
 
-quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
-                                lp_solver="gurobi", params=list(),
+quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
+                                x0=NULL, lp_solver="gurobi", params=list(),
                                 warm_starts=TRUE, time_limit=time_limit,
                                 jitter=NULL, verbose=FALSE) {
   # Set up some basic objects that we will need
@@ -233,7 +233,7 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights,
       }
 
       # Call Gurobi's LP solver, store results
-      a = gurobi(model=model, params=params)
+      a = gurobi::gurobi(model=model, params=params)
       beta[,j] = a$x[1:p]
       status[j] = a$status
       if (warm_starts) last_sol = a$x
@@ -452,7 +452,7 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) {
   if (use_gurobi) {
     model$sense = c(rep(">=", 2*m), rep("=", p))
     model$lb = c(rep(-Inf,m), 0)
-    a = gurobi(model=model, params=list(LogToConsole=0))
+    a = gurobi::gurobi(model=model, params=list(LogToConsole=0)) 
     lambda_max = a$x[m+1]
   }
 

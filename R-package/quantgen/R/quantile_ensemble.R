@@ -117,8 +117,20 @@ quantile_ensemble = function(qarr, y, tau, weights=NULL,
                                   unit_sum=unit_sum, lp_solver=lp_solver,
                                   time_limit=time_limit, params=params, verbose)
   }
+  
   # Flexible stacking
   else {
+    # First properly set up q0, if there's noncrossing constraints 
+    if (noncross) {
+      # If there's no q0 passed, then just use the training points
+      if (is.null(q0)) q0 = qarr
+      # If there's one passed, then account for intercept if needed
+      if (!is.null(q0) && intercept) {
+        n0 = dim(q0)[1]; a0 = array(NA, dim=c(n0,p,r))
+        for (k in 1:r) a0[,,k] = cbind(rep(1,n0), q0[,,k])
+        q0 = a0
+      }
+    }
     obj = quantile_ensemble_flex(qarr=qarr, y=y, tau=tau, weights=weights,
                                  tau_groups=tau_groups, intercept=intercept,
                                  nonneg=nonneg, unit_sum=unit_sum,
@@ -213,7 +225,7 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
 
   # Call Gurobi's LP solver, store results
   if (use_gurobi) {
-    a = gurobi(model=model, params=params)
+    a = gurobi::gurobi(model=model, params=params)
     alpha = a$x[1:p]
     status = a$status
   }
@@ -322,35 +334,18 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
 
   # Remove nonnegativity constraint on alpha, if we're asked to
   if (!nonneg) {
-      if (use_gurobi) {
-          model$lb = c(rep(-Inf,P), rep(0,N))
-      } else {
-          model$bounds = list(lower=list(ind=1:P, val=rep(-Inf,P)))
-      }
+    if (use_gurobi) model$lb = c(rep(-Inf,P), rep(0,N))
+    else model$bounds = list(lower=list(ind=1:P, val=rep(-Inf,P)))
   }
 
   # Remove nonnegativity constraint on intercepts, if needed
   if (intercept && nonneg) {
-      if (use_gurobi) {
-          model$lb = c(rep(c(-Inf, rep(0,p-1)), r), rep(0,N))
-      } else {
-          model$bounds = list(lower=list(ind=(0:(r-1))*p + 1, val=rep(-Inf,r)))
-      }
-
+    if (use_gurobi) model$lb = c(rep(c(-Inf, rep(0,p-1)), r), rep(0,N))
+    else model$bounds = list(lower=list(ind=(0:(r-1))*p + 1, val=rep(-Inf,r)))
   }
 
   # Noncrossing constraints, if we're asked to
   if (noncross) {
-    # If there's no q0 passed, then just use the training points
-    if (is.null(q0)) q0 = qarr
-    # If there's one passed, then account for intercept if needed!
-    if (!is.null(q0) && intercept) {
-      n0 = dim(q0)[1]; a0 = array(NA, dim=c(n0,p,r))
-      for (k in 1:r) a0[,,k] = cbind(rep(1,n0), q0[,,k])
-      q0 = a0
-    }
-
-    # Now implement the noncrossing constraints
     n0 = dim(q0)[1]
     B = Matrix(0, nrow=n0*(r-1), ncol=N+P, sparse=TRUE)
     for (k in 1:(r-1)) {
@@ -364,7 +359,7 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
 
   # Call Gurobi's LP solver, store results
   if (use_gurobi) {
-    a = gurobi(model=model, params=params)
+    a = gurobi::gurobi(model=model, params=params)
     alpha = matrix(a$x[1:P],p,r)
     status = a$status
   }
