@@ -214,13 +214,13 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
   # Remove nonnegativity constraint on alpha, if we're asked to
   if (!nonneg) {
     if (use_gurobi) model$lb = c(rep(-Inf,p), rep(0,N))
-    else model$bounds = list(lower=list(ind=1:p, val=rep(-Inf,p)))
+    else model$lb = list(lower=list(ind=1:p, val=rep(-Inf,p)))
   }
 
   # Remove nonnegativity constraint on intercept, if needed
   if (intercept && nonneg) {
     if (use_gurobi) model$lb = c(-Inf, rep(0,p-1+N))
-    else model$bounds = list(lower=list(ind=1, val=-Inf))
+    else model$lb = list(lower=list(ind=1, val=-Inf))
   }
 
   # Call Gurobi's LP solver, store results
@@ -233,7 +233,7 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
   # Call GLPK's LP solver, store results
   else {
     a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                       rhs=model$rhs, bounds=model$bounds, control=params)
+                       rhs=model$rhs, bounds=model$lb, control=params)
     alpha = a$solution[1:p]
     status = a$status
   }
@@ -335,13 +335,13 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   # Remove nonnegativity constraint on alpha, if we're asked to
   if (!nonneg) {
     if (use_gurobi) model$lb = c(rep(-Inf,P), rep(0,N))
-    else model$bounds = list(lower=list(ind=1:P, val=rep(-Inf,P)))
+    else model$lb = list(lower=list(ind=1:P, val=rep(-Inf,P)))
   }
 
   # Remove nonnegativity constraint on intercepts, if needed
   if (intercept && nonneg) {
     if (use_gurobi) model$lb = c(rep(c(-Inf, rep(0,p-1)), r), rep(0,N))
-    else model$bounds = list(lower=list(ind=(0:(r-1))*p + 1, val=rep(-Inf,r)))
+    else model$lb = list(lower=list(ind=(0:(r-1))*p + 1, val=rep(-Inf,r)))
   }
 
   # Noncrossing constraints, if we're asked to
@@ -367,7 +367,7 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   # Call GLPK's LP solver, store results
   else {
     a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                       rhs=model$rhs, bounds=model$bounds, control=params)
+                       rhs=model$rhs, bounds=model$lb, control=params)
     alpha = matrix(a$solution[1:P],p,r)
     status = a$status
   }
