@@ -9,8 +9,8 @@ ensemble out of the models submitted to the
 [COVID Forecast Hub](https://github.com/reichlab/covid19-forecast-hub/blob/master/README.md#the-covid-forecast-hub-team),
 which is a collaborative repo with COVID forecasts from many groups different
 (visualized [here](https://viz.covid19forecasthub.org)), and the data source
-behind the
-[CDC COVID-19 Forecasting page](https://www.cdc.gov/coronavirus/2019-ncov/covid-data/forecasting-us.html).  
+behind the official
+[CDC COVID Forecasting page](https://www.cdc.gov/coronavirus/2019-ncov/covid-data/forecasting-us.html).  
 
 ### Summary of package tools 
 
@@ -45,7 +45,7 @@ If at all possible, Gurobi should be used because it is much faster and more
 stable.  The mathematical details for how these LPs are formed are given in the
 notebooks linked below. 
 
-### Example notebooks
+### Example R notebooks
 
 For examples in the form of R notebooks, see:
 
