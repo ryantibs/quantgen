@@ -44,18 +44,18 @@ notebooks linked below.
 
 For examples in the form of R notebooks, see:
 
-- (simple_test.html)[https://ryantibs.github.io/quantgen/simple_test.html]:
+- [simple_test.html](https://ryantibs.github.io/quantgen/simple_test.html):
   simple tests comparing the outputs and speeds of the two LP solvers to `rqPen`
   (which is based on the `quantreg` package).
 
-- (cv_example.html)[https://ryantibs.github.io/quantgen/cv_example.html]:
+- [cv_example.html](https://ryantibs.github.io/quantgen/cv_example.html):
   examples of how to use cross-validation to select the tuning parameters in
   penalized quantile regression, how to extrapolate a smaller set of quantiles
   into richer set of quantiles at prediction time, and how to use noncrossing
   constraints.
 
 -
-  (stacking_example.html)[https://ryantibs.github.io/quantgen/stacking_example.html]:
+  [stacking_example.html](https://ryantibs.github.io/quantgen/stacking_example.html):
   examples of how to use linear stacking to build quantile model ensembles.
 
 ### Install the R package
