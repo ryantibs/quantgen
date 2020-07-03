@@ -138,3 +138,27 @@ for (i in 1:9) {
   legend("topleft", legend=c("True", "Predicted (refit)", "Predicted (log, refit)"), col=c(1,3,6), pch=c(21,20,20))
 }
 ```
+
+Noncrossing constraints
+===
+
+We refit the last CV object at new quantile levels, and additionally enforce noncrossing constraints. (Note that these noncrossing constraints can only be applied when the values in the `tau` vector being passed to `quantile_genlasso()` are distinct, and sorted in increasing order.)
+
+```{r}
+n0 = 9
+x0 = matrix(rnorm(n0*p), n0, p)
+new_obj3 = refit_quantile_lasso(cv_obj2, x, y, tau_new, noncross=TRUE, x0=rbind(x,x0), verbose=TRUE)
+qpred1 = predict(new_obj2, x0, sort=FALSE, nonneg=TRUE, round=TRUE)
+qpred2 = predict(new_obj2, x0, sort=TRUE, nonneg=TRUE, round=TRUE) 
+qpred3 = predict(new_obj3, x0, sort=FALSE, nonneg=TRUE, round=TRUE) # Should be sorted already
+
+par(mfrow=c(1,3))
+for (i in 1:9) {
+  qtrue = qpois(tau_new, exp(mu(x0[i,])))
+  plot(tau_new, qtrue, type="o", ylim=range(qtrue, qpred1[i,], qpred2[i,], qpred3[i,], na.rm=TRUE), ylab="Quantile")
+  lines(tau_new, qpred1[i,], col=2, pch=20, type="o")
+  lines(tau_new, qpred2[i,], col=3, pch=20, type="o")
+  lines(tau_new, qpred3[i,], col=4, pch=20, type="o")
+  legend("topleft", legend=c("True", "Predicted", "Predicted (sort)", "Predicted (noncross)"), col=1:4, pch=c(21,20,20,20))
+}
+```
