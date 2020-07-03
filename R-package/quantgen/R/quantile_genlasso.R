@@ -133,6 +133,18 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
     lambda = rep(lambda, length=k)
   }
 
+  # Properly set up x0, if there's noncrossing constraints 
+  if (noncross) {
+    # If there's no x0 passed, then just use the training points
+    if (is.null(x0)) x0 = x
+    # If there's one passed, then check for standardization/intercept, and
+    # adjust x0 if needed
+    if (!is.null(x0)) {
+      if (standardize) x0 = scale(x0,bx,sx)
+      if (intercept) x0 = cbind(rep(1,nrow(x0)), x0)
+    }
+  }
+  
   # Solve the quantile generalized lasso LPs
   obj = quantile_genlasso_lp(x=x, y=y, d=d, tau=tau, lambda=lambda,
                              weights=weights, noncross=noncross, x0=x0,
@@ -166,9 +178,11 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
   Inn = Diagonal(n); Imm = Diagonal(m)
   Znm = Matrix(0,n,m,sparse=TRUE)
   Zmn = Matrix(0,m,n,sparse=TRUE)
-  model = list()
-  model$sense = rep(">=", 2*n+2*m)
-
+  model = model_big = list()
+  N = 2*n + 2*m; P = p + m + n
+  r = length(tau); n0 = nrow(x0)
+  model$sense = rep(">=", N)
+  
   # Determine LP solver
   use_gurobi = FALSE
   if (lp_solver == "gurobi") {
@@ -180,75 +194,138 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
   if (use_gurobi) {
     if (!is.null(time_limit)) params$TimeLimit = time_limit
     if (is.null(params$LogToConsole)) params$LogToConsole = 0
-    if (verbose && length(tau) == 1) params$LogToConsole = 1
+    # In verbose mode, if there's just one problem or one big noncrossing
+    # problem, then display output differently
+    if (verbose && (noncross || r == 1)) {
+      verbose = FALSE
+      params$LogToConsole = 1
+    }
     model$lb = c(rep(-Inf,p), rep(0,m), rep(0,n))
   }
 
   # GLPK setup
   else {
     if (!is.null(time_limit)) params$tm_limit = time_limit * 1000
-    if (verbose && length(tau) == 1) params$verbose = TRUE
-    model$bounds = list(lower=list(ind=1:p, val=rep(-Inf,p)))
+    # In verbose mode, if there's just one problem or one big noncrossing
+    # problem, then display output differently
+    if (verbose && (noncross || r == 1)) {
+      verbose = FALSE
+      params$verbose = TRUE
+    }
+    model$lb = list(lower=list(ind=1:p, val=rep(-Inf,p)))
   }
 
+  # Noncrossing setup
+  if (noncross) {
+    model_big$obj = rep(0, P*r)
+    model_big$A = Matrix(0, nrow=N*r, ncol=P*r, sparse=TRUE)
+    model_big$sense = rep(model$sense, r)
+  }
+  
   # Loop over tau/lambda values
-  beta = Matrix(0, nrow=p, ncol=length(tau), sparse=TRUE)
-  status = rep(NA, length(tau))
+  beta = Matrix(0, nrow=p, ncol=r, sparse=TRUE)
+  status = rep(NA, r)
   last_sol = NULL
 
-  if (verbose && length(tau) > 1) {
-    cat(sprintf("Problems solved (of %i): ", length(tau)))
-  }
-  for (j in 1:length(tau)) {
-    if (verbose && length(tau) > 1 && (length(tau) <= 10 || j %% 5 == 0)) {
-      cat(paste(j, "... "))
-    }
+  if (verbose) cat(sprintf("Problems solved (of %i): ", r))
+  for (k in 1:r) {
+    if (verbose && (r <= 10 || k %% 5 == 0)) cat(paste(k, "... "))
 
     # Apply random jitter, if we're asked to
     if (!is.null(jitter)) yy = y + jitter(n)
     else yy = y
 
     # Vector of objective coefficients
-    model$obj = c(rep(0,p), rep(lambda[j],m), weights)
+    model$obj = c(rep(0,p), rep(lambda[k],m), weights)
 
     # Matrix of constraint coefficients: depends only on tau, so we try to save
     # work if possible (check if we've already created this for last tau value)
-    if (j == 1 || tau[j] != tau[j-1]) {
+    if (k == 1 || tau[k] != tau[k-1]) {
       model$A = rbind(
-        cbind(tau[j]*x, Znm, Inn),
-        cbind((tau[j]-1)*x, Znm, Inn),
+        cbind(tau[k]*x, Znm, Inn),
+        cbind((tau[k]-1)*x, Znm, Inn),
         cbind(-d, Imm, Zmn),
         cbind(d, Imm, Zmn)
       )
     }
 
     # Right hand side of constraints
-    model$rhs = c(tau[j]*y, (tau[j]-1)*y, rep(0,2*m))
+    model$rhs = c(tau[k]*y, (tau[k]-1)*y, rep(0,2*m))
+
+    # For noncrossing constraints, save these for later
+    if (noncross) {
+      model_big$obj[(k-1)*P + 1:P] = model$obj
+      model_big$A[(k-1)*N + 1:N, (k-1)*P + 1:P] = model$A
+      model_big$rhs[(k-1)*N + 1:N] = model$rhs
+    }
+
+    # Otherwise, go ahead and solve the individual LP
+    else {
+      # Gurobi
+      if (use_gurobi) {
+        # Set a warm start, if we're asked to
+        if (warm_starts && !is.null(last_sol)) {
+          model$start = last_sol
+        }
+
+        # Call Gurobi's LP solver, store results
+        a = gurobi::gurobi(model=model, params=params)
+        beta[,k] = a$x[1:p]
+        status[k] = a$status
+        if (warm_starts) last_sol = a$x
+      }
+
+      # GLPK
+      else {
+        # Call GLPK's LP solver, store results
+        a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
+                           rhs=model$rhs, bounds=model$lb, control=params)
+        beta[,k] = a$solution[1:p]
+        status[k] = a$status
+      }
+    }
+  }; if (verbose) cat("\n")
+  
+  # Back to noncrossing constraints, we need to solve one big LP
+  if (noncross) {
+    # Add to the constraint matrix, and right hand side vector
+    B = Matrix(0, nrow=n0*(r-1), ncol=P*r, sparse=TRUE)
+    for (k in 1:(r-1)) {
+      B[(k-1)*n0 + 1:n0, (k-1)*P + 1:p] = -x0
+      B[(k-1)*n0 + 1:n0, k*P + 1:p] = x0
+    }
+    model_big$A = rbind(model_big$A, B)
+    model_big$sense = c(model_big$sense, rep(">=", n0*(r-1)))
+    model_big$rhs = c(model_big$rhs, rep(0, n0*(r-1)))
 
     # Gurobi
     if (use_gurobi) {
-      # Set a warm start, if we're asked to
-      if (warm_starts && !is.null(last_sol)) {
-        model$start = last_sol
-      }
+      # Extend lower bound parameter
+      model_big$lb = rep(model$lb, r)
 
       # Call Gurobi's LP solver, store results
-      a = gurobi::gurobi(model=model, params=params)
-      beta[,j] = a$x[1:p]
-      status[j] = a$status
-      if (warm_starts) last_sol = a$x
+      a = gurobi::gurobi(model=model_big, params=params)
+      beta = Matrix(a$x[rep(1:p, r) + rep(P*0:(r-1), each=p)], nrow=p, ncol=r, 
+                    sparse=TRUE)  
+      status = a$status
     }
-
+    
     # GLPK
     else {
+      # Extend lower bound parameter
+      model_big$lb = list(lower=list(ind=rep(1:p, r) + rep(P*0:(r-1), each=p),
+                                     val=rep(-Inf, p*r)))
+      
       # Call GLPK's LP solver, store results
-      a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                         rhs=model$rhs, bounds=model$bounds, control=params)
-      beta[,j] = a$solution[1:p]
-      status[j] = a$status
+      a = Rglpk_solve_LP(obj=model_big$obj, mat=model_big$A,
+                         dir=model_big$sense, rhs=model_big$rhs,
+                         bounds=model_big$lb, control=params) 
+      beta = Matrix(a$solution[rep(1:p, r) + rep(P*0:(r-1), each=p)], nrow=p,
+                    ncol=r, sparse=TRUE) 
+      status = a$status
     }
-  }; if (verbose && length(tau) > 1) cat("\n")
-
+  }
+  
   return(enlist(beta, status))
 }
 
@@ -316,7 +393,8 @@ predict.quantile_genlasso = function(object, newx, s=NULL, sort=FALSE,
                                      iso=FALSE, nonneg=FALSE, round=FALSE,
                                      ...) {
   # Set up some basics
-  newx = as.matrix(newx); n0 = nrow(newx)
+  if (!is.matrix(newx)) newx = matrix(newx, nrow=1)
+  n0 = nrow(newx)
   if (object$intercept || object$standardize) newx = cbind(rep(1,n0), newx) 
   z = as.matrix(newx %*% coef(object,s))
 
@@ -459,9 +537,9 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) {
   # GLPK
   else {
     model$sense = c(rep(">=", 2*m), rep("==", p))
-    model$bounds = list(lower=list(ind=1:m, val=rep(-Inf,m)))
+    model$lb = list(lower=list(ind=1:m, val=rep(-Inf,m)))
     a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                       rhs=model$rhs, bounds=model$bounds)
+                       rhs=model$rhs, bounds=model$lb)
     lambda_max = a$solution[m+1]
   }
 
@@ -521,7 +599,8 @@ get_lambda_seq = function(x, y, d, nlambda, lambda_min_ratio, weights=NULL,
 predict.quantile_genlasso_grid = function(object, newx, sort=FALSE, iso=FALSE,  
                                           nonneg=FALSE, round=FALSE, ...) { 
   # Set up some basics
-  newx = as.matrix(newx); n0 = nrow(newx)
+  if (!is.matrix(newx)) newx = matrix(newx, nrow=1)
+  n0 = nrow(newx)
   if (object$intercept || object$standardize) newx = cbind(rep(1,n0), newx) 
   z = as.matrix(newx %*% coef(object))
 

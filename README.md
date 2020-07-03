@@ -1,7 +1,7 @@
 # quantgen
 
 Tools for generalized quantile modeling: penalized quantile regression,
-penalties, cross-validation, and ensembles. 
+penalties, noncrossing constraints, cross-validation, and ensembles. 
 
 ### Install the R package
 
