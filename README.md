@@ -81,8 +81,8 @@ install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
 
 - For R <= 3.6.1, you can then follow
   [these instructions](https://www.gurobi.com/documentation/9.0/refman/ins_the_r_package.html)
-  to install the Gurobi R package.
+  to install the `gurobi` R package.
 
-- For R > 3.6.1, you will have to download the Gurobi R package directly from
+- For R > 3.6.1, you will have to download the `gurobi` R package directly from
   [this link](https://upload.gurobi.com/gurobiR/gurobi9.0.2_R.tar.gz), and build
   it yourself.  (It is apparently not yet fully released/supported by Gurobi.)
