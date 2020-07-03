@@ -13,7 +13,7 @@ get_lambda_seq(
   weights = NULL,
   intercept = TRUE,
   standardize = TRUE,
-  lp_solver = c("gurobi", "glpk"),
+  lp_solver = c("glpk", "gurobi"),
   transform = NULL
 )
 }

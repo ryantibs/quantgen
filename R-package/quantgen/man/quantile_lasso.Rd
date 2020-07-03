@@ -15,7 +15,7 @@ quantile_lasso(
   standardize = TRUE,
   noncross = FALSE,
   x0 = NULL,
-  lp_solver = c("gurobi", "glpk"),
+  lp_solver = c("glpk", "gurobi"),
   time_limit = NULL,
   warm_starts = TRUE,
   params = list(),

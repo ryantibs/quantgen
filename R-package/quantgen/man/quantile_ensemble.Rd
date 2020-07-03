@@ -15,7 +15,7 @@ quantile_ensemble(
   unit_sum = TRUE,
   noncross = TRUE,
   q0 = NULL,
-  lp_solver = c("gurobi", "glpk"),
+  lp_solver = c("glpk", "gurobi"),
   time_limit = NULL,
   params = list(),
   verbose = FALSE
@@ -60,8 +60,9 @@ components) x (number of quantile levels). Default is NULL, which means
 that we consider noncrossing constraints at the training points
 \code{qarr}.}
 
-\item{lp_solver}{One of "gurobi" or "glpk", indicating which LP solver to
-use. Default is "gurobi".}
+\item{lp_solver}{One of "glpk" or "gurobi", indicating which LP solver to
+use. If possible, "gurobi" should be used because it is much faster and
+more stable; default is "glpk"; however, because it is open-source.}
 
 \item{time_limit}{This sets the maximum amount of time (in seconds) to allow
 Gurobi or GLPK to solve any single quantile generalized lasso problem (for

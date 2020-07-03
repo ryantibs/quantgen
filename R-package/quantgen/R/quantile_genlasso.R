@@ -32,8 +32,9 @@
 #' @param x0 Matrix of points used to define the noncrossing
 #'   constraints. Default is NULL, which means that we consider noncrossing
 #'   constraints at the training points \code{x}.
-#' @param lp_solver One of "gurobi" or "glpk", indicating which LP solver to
-#'   use. Default is "gurobi".
+#' @param lp_solver One of "glpk" or "gurobi", indicating which LP solver to
+#'   use. If possible, "gurobi" should be used because it is much faster and
+#'   more stable; default is "glpk"; however, because it is open-source.
 #' @param time_limit This sets the maximum amount of time (in seconds) to allow
 #'   Gurobi or GLPK to solve any single quantile generalized lasso problem (for
 #'   a single tau and lambda value). Default is NULL, which means unlimited
@@ -108,7 +109,7 @@
 
 quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
                              standardize=TRUE, noncross=FALSE, x0=NULL,
-                             lp_solver=c("gurobi","glpk"), time_limit=NULL,
+                             lp_solver=c("glpk","gurobi"), time_limit=NULL,
                              warm_starts=TRUE, params=list(), transform=NULL,
                              inv_trans=NULL, jitter=NULL, verbose=FALSE) {
   # Set up some basics
@@ -444,7 +445,7 @@ predict.quantile_genlasso = function(object, newx, s=NULL, sort=FALSE,
 quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                   lambda_min_ratio=1e-3, weights=NULL,
                                   intercept=TRUE, standardize=TRUE,
-                                  lp_solver=c("gurobi","glpk"), time_limit=NULL,
+                                  lp_solver=c("glpk","gurobi"), time_limit=NULL,
                                   warm_starts=TRUE, params=list(),
                                   transform=NULL, inv_trans=NULL, jitter=NULL,
                                   verbose=FALSE) {
@@ -491,7 +492,7 @@ quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
 #'
 #' @export
 
-get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) {
+get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("glpk","gurobi")) {
   # Set up some basic objects that we will need
   n = length(y); p = ncol(x); m = nrow(d)
   if (is.null(weights)) weights = rep(1,n)
@@ -560,7 +561,7 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("gurobi","glpk")) {
 
 get_lambda_seq = function(x, y, d, nlambda, lambda_min_ratio, weights=NULL,
                           intercept=TRUE, standardize=TRUE,
-                          lp_solver=c("gurobi","glpk"), transform=NULL) {
+                          lp_solver=c("glpk","gurobi"), transform=NULL) {
   # Set up some basics
   if (is.null(weights)) weights = rep(1,length(y))
   lp_solver = match.arg(lp_solver)

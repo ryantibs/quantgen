@@ -30,8 +30,9 @@
 #'   components) x (number of quantile levels). Default is NULL, which means
 #'   that we consider noncrossing constraints at the training points
 #'   \code{qarr}.
-#' @param lp_solver One of "gurobi" or "glpk", indicating which LP solver to
-#'   use. Default is "gurobi".
+#' @param lp_solver One of "glpk" or "gurobi", indicating which LP solver to
+#'   use. If possible, "gurobi" should be used because it is much faster and
+#'   more stable; default is "glpk"; however, because it is open-source.
 #' @param time_limit This sets the maximum amount of time (in seconds) to allow
 #'   Gurobi or GLPK to solve any single quantile generalized lasso problem (for
 #'   a single tau and lambda value). Default is NULL, which means unlimited
@@ -93,8 +94,8 @@
 quantile_ensemble = function(qarr, y, tau, weights=NULL,
                              tau_groups=rep(1,length(tau)), intercept=FALSE,
                              nonneg=TRUE, unit_sum=TRUE, noncross=TRUE, q0=NULL,
-                             lp_solver=c("gurobi", "glpk"), time_limit=NULL, params=list(),
-                             verbose=FALSE) {
+                             lp_solver=c("glpk","gurobi"), time_limit=NULL,
+                             params=list(), verbose=FALSE) {
   # Set up some basics
   n = dim(qarr)[1]
   p = dim(qarr)[2]
@@ -149,7 +150,7 @@ quantile_ensemble = function(qarr, y, tau, weights=NULL,
 
 quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
                                    nonneg=TRUE, unit_sum=TRUE,
-                                   lp_solver=c("gurobi", "glpk"), time_limit=NULL,
+                                   lp_solver=c("glpk","gurobi"), time_limit=NULL,
                                    params=list(), verbose=FALSE) {
   # Set up some basic objects that we will need
   n = dim(qarr)[1]
@@ -245,9 +246,9 @@ quantile_ensemble_stand = function(qarr, y, tau, weights, intercept=FALSE,
 
 quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
                                   intercept=FALSE, nonneg=TRUE, unit_sum=TRUE,
-                                  noncross=TRUE, q0=NULL, lp_solver="gurobi",
-                                  time_limit=NULL, params=list(),
-                                  verbose=FALSE) {
+                                  noncross=TRUE, q0=NULL,
+                                  lp_solver=c("glpk","gurobi"), time_limit=NULL,
+                                  params=list(), verbose=FALSE) {
   # Set up some basic objects that we will need
   n = dim(qarr)[1]
   p = dim(qarr)[2]

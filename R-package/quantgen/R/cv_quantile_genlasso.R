@@ -40,7 +40,7 @@
 cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                 lambda_min_ratio=1e-3, weights=NULL, nfolds=5,
                                 train_test_inds=NULL, intercept=TRUE,
-                                standardize=TRUE, lp_solver=c("gurobi","glpk"),
+                                standardize=TRUE, lp_solver=c("glpk","gurobi"),
                                 time_limit=NULL, warm_starts=TRUE,
                                 params=list(), transform=NULL, inv_trans=NULL,
                                 jitter=NULL, verbose=FALSE, sort=FALSE,

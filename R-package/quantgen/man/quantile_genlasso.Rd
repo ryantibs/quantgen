@@ -15,7 +15,7 @@ quantile_genlasso(
   standardize = TRUE,
   noncross = FALSE,
   x0 = NULL,
-  lp_solver = c("gurobi", "glpk"),
+  lp_solver = c("glpk", "gurobi"),
   time_limit = NULL,
   warm_starts = TRUE,
   params = list(),
@@ -65,8 +65,9 @@ argument \code{x0}. Note: this option only makes sense if the values in the
 constraints. Default is NULL, which means that we consider noncrossing
 constraints at the training points \code{x}.}
 
-\item{lp_solver}{One of "gurobi" or "glpk", indicating which LP solver to
-use. Default is "gurobi".}
+\item{lp_solver}{One of "glpk" or "gurobi", indicating which LP solver to
+use. If possible, "gurobi" should be used because it is much faster and
+more stable; default is "glpk"; however, because it is open-source.}
 
 \item{time_limit}{This sets the maximum amount of time (in seconds) to allow
 Gurobi or GLPK to solve any single quantile generalized lasso problem (for

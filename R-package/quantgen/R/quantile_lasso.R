@@ -64,7 +64,7 @@
 
 quantile_lasso = function(x, y, tau, lambda, weights=NULL, no_pen_vars=c(), 
                           intercept=TRUE, standardize=TRUE, noncross=FALSE,
-                          x0=NULL, lp_solver=c("gurobi","glpk"),
+                          x0=NULL, lp_solver=c("glpk","gurobi"),
                           time_limit=NULL, warm_starts=TRUE, params=list(),
                           transform=NULL, inv_trans=NULL, jitter=NULL,
                           verbose=FALSE) {
@@ -111,7 +111,7 @@ quantile_lasso = function(x, y, tau, lambda, weights=NULL, no_pen_vars=c(),
 quantile_lasso_grid = function(x, y, tau, lambda=NULL, nlambda=30,
                                lambda_min_ratio=1e-3, weights=NULL,
                                no_pen_vars=c(), intercept=TRUE,
-                               standardize=TRUE, lp_solver=c("gurobi","glpk"), 
+                               standardize=TRUE, lp_solver=c("glpk","gurobi"), 
                                time_limit=NULL, warm_starts=TRUE, params=list(),
                                transform=NULL, inv_trans=NULL, jitter=NULL,
                                verbose=FALSE) { 
@@ -174,7 +174,7 @@ cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
                              lambda_min_ratio=1e-3, weights=NULL,
                              no_pen_vars=c(), nfolds=5, train_test_inds=NULL,
                              intercept=TRUE, standardize=TRUE,
-                             lp_solver=c("gurobi","glpk"), time_limit=NULL,
+                             lp_solver=c("glpk","gurobi"), time_limit=NULL,
                              warm_starts=TRUE, params=list(), transform=NULL,
                              inv_trans=NULL, jitter=NULL, verbose=FALSE,
                              sort=FALSE, iso=FALSE, nonneg=FALSE, round=FALSE) {  
