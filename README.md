@@ -3,15 +3,20 @@
 Tools for generalized quantile modeling: penalized quantile regression,
 penalties, noncrossing constraints, cross-validation, and ensembles.
 
-This main purpose of this repo is to support [Delphi's](https://delphi.cmu.edu)
-COVID-19 forecasts and the [Reich Lab's](https://reichlab.io) ensemble of
-COVID-19 forecasts, visualized [here](https://viz.covid19forecasthub.org).
+This main purpose of this repo is to support the development of
+[Delphi's](https://delphi.cmu.edu) COVID forecasts, and the development an
+ensemble out of the models submitted to the
+[COVID Forecast Hub](https://github.com/reichlab/covid19-forecast-hub/blob/master/README.md#the-covid-forecast-hub-team),
+which is a collaborative repo with COVID forecasts from many groups different
+(visualized [here](https://viz.covid19forecasthub.org)), and the data source
+behind the
+[CDC COVID-19 Forecasting page](https://www.cdc.gov/coronavirus/2019-ncov/covid-data/forecasting-us.html).  
 
 ### Summary of package tools 
 
 Briefly, the R package `quantgen` provides:
 
-- More flexible tools for quantile regression compared to existing R packages
+- More general tools for quantile regression compared to existing R packages 
   (to our knowledge), allowing for generalized lasso penalties, and noncrossing
   constraints.
   
@@ -34,9 +39,9 @@ programs (LPs), and solved using one of two LP solvers:
 package.
 
 2. Gurobi, which is not open-source but free for academic use, and available
-   through the `gurobi` package, (see below).
+   through the `gurobi` package (see below).
 
-If at all possible, Gurobi should be used since it is much faster and more
+If at all possible, Gurobi should be used because it is much faster and more
 stable.  The mathematical details for how these LPs are formed are given in the
 notebooks linked below. 
 
@@ -58,16 +63,16 @@ For examples in the form of R notebooks, see:
   [stacking_example.html](https://ryantibs.github.io/quantgen/stacking_example.html):
   examples of how to use linear stacking to build quantile model ensembles.
 
-### Install the R package
+### Install the `quantgen` R package
 
-To install the quantgen R package directly from github, run the following in R:
+To install the `quantgen` R package directly from GitHub, run the following in R:
 
 ```{r}
 library(devtools)
 install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
 ```
 
-### Install Gurobi for R
+### Install the `gurobi` R package
 
 - First install the latest version of Gurobi optimizer
   [here](https://www.gurobi.com/products/gurobi-optimizer/); for academics, you
