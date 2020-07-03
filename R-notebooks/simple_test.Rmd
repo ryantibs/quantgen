@@ -65,7 +65,7 @@ tau = 0.8
 lambda = sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
 
 # No intercept, no standardize
-a1 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE)
+a1 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="gurobi")
 a2 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="glpk")
 a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=FALSE)
 max(abs(coef(a1)-coef(a3)))
@@ -74,7 +74,7 @@ max(abs(predict(a1,x0) - predict(a3,x0)))
 max(abs(predict(a2,x0) - predict(a3,x0)))
 
 # Yes intercept, no standardize
-a1 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=FALSE)
+a1 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=FALSE, lp_solver="gurobi")
 a2 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=FALSE, lp_solver="glpk")
 a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=TRUE, scalex=FALSE)
 max(abs(coef(a1)-coef(a3)))
@@ -83,7 +83,7 @@ max(abs(predict(a1,x0) - predict(a3,x0)))
 max(abs(predict(a2,x0) - predict(a3,x0)))
 
 # No intercept, yes standardize
-a1 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=TRUE)
+a1 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=TRUE, lp_solver="gurobi")
 a2 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=TRUE, lp_solver="glpk")
 a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=TRUE)
 max(abs(coef(a1)[-1]-coef(a3)))
@@ -93,7 +93,7 @@ max(abs(predict(a2,x0) - predict(a3,x0)))
 # I think that rqPen is forgetting to add the result of centering the x's back into the intercept
 
 # Yes intercept, yes standardize
-a1 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=TRUE)
+a1 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=TRUE, lp_solver="gurobi")
 a2 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=TRUE, lp_solver="glpk")
 a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=TRUE, scalex=TRUE)
 max(abs(coef(a1)[-1]-coef(a3)[-1]))
@@ -118,7 +118,7 @@ y = apply(x, 1, mu) + rnorm(n)
 tau = 0.8
 lambda = sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
 
-system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, verbose=TRUE))[3]
+system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="gurobi", verbose=TRUE))[3]
 system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="glpk", verbose=TRUE))[3]
 system.time(rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=FALSE))[3]
 ```

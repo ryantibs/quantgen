@@ -89,13 +89,13 @@ lines(density(e), lwd=2)
 # Run CV for usual lasso, and quantile lasso
 tau = c(0.1, 0.3, 0.5, 0.7, 0.9)
 glmnet_obj = cv.glmnet(x, y, nfolds=5)
-quant_obj = cv_quantile_lasso(x, y, tau=tau, nlambda=30, nfolds=5, verbose=TRUE, sort=TRUE)
+quant_obj = cv_quantile_lasso(x, y, tau=tau, nlambda=30, nfolds=5, lp_solver="gurobi", verbose=TRUE, sort=TRUE)
 plot(glmnet_obj)
 plot(quant_obj)
 
 # Refit quantile lasso at more quantile levels
 tau_new = c(0.01, 0.025, seq(0.05, 0.95, by=0.05), 0.975, 0.99) 
-refit_obj = refit_quantile_lasso(quant_obj, x, y, tau_new, verbose=TRUE)
+refit_obj = refit_quantile_lasso(quant_obj, x, y, tau_new, lp_solver="gurobi", verbose=TRUE)
 
 # Generate test data 
 n0 = 300
@@ -124,15 +124,15 @@ for (i in 1:9) {
 qarr = combine_into_array(qpred1, qpred2, qpred3)
 
 # Standard stacking: one weight per ensemble member
-st_obj1 = quantile_ensemble(qarr, y0, tau_new, verbose=TRUE)
+st_obj1 = quantile_ensemble(qarr, y0, tau_new, lp_solver="gurobi", verbose=TRUE)
 coef(st_obj1)
 
 # Flexible stacking: one weight per ensemble member, per quantile level
-st_obj2 = quantile_ensemble(qarr, y0, tau_new, tau_groups=1:length(tau_new), verbose=TRUE)
+st_obj2 = quantile_ensemble(qarr, y0, tau_new, tau_groups=1:length(tau_new), lp_solver="gurobi", verbose=TRUE)
 coef(st_obj2)
 
 # Somewhere in the middle: group the extreme 3 quantiles together on either tail, and the middle 
-st_obj3 = quantile_ensemble(qarr, y0, tau_new, tau_groups=c(rep(1,3),rep(2,17),rep(3,3)), verbose=TRUE)
+st_obj3 = quantile_ensemble(qarr, y0, tau_new, tau_groups=c(rep(1,3),rep(2,17),rep(3,3)), lp_solver="gurobi", verbose=TRUE)
 coef(st_obj3)
 
 # Make predictions back on qarr
