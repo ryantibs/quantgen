@@ -438,9 +438,10 @@ predict.quantile_ensemble = function(object, newq, s=NULL, sort=TRUE, iso=FALSE,
   z = matrix(NA, nrow=n0, ncol=r)
   alpha = matrix(object$alpha, nrow=p, ncol=r)
   for (i in 1:n0) {
-    mat = t(`dim<-`(newq[i, , ], apply(newq, 1, dim)[, 1])) %*% alpha
-    if (r == 1) z[i,] = mat
-    else z[i,] = diag(mat)
+    qmat = matrix(newq[i,,], nrow=dim(newq)[2], ncol=dim(newq)[3])
+    pmat = t(qmat) %*% alpha
+    if (r == 1) z[i,] = pmat
+    else z[i,] = diag(pmat)
   }
 
   # Run isotonic regression, sort, truncated, round, if we're asked to
