@@ -77,7 +77,7 @@ time.}
 \item{warm_starts}{Should warm starts be used in the LP solver (from one LP
 solve to the next)? Only supported for Gurobi.}
 
-\item{params}{A list of control parameters to pass to Gurobi or GLPK. Default
+\item{params}{List of control parameters to pass to Gurobi or GLPK. Default
 is \code{list()} which means no additional parameters are passed. For
 example: with Gurobi, we can use \code{list(Threads=4)} to specify that
 Gurobi should use 4 threads when available. (Note that if a time limit is
@@ -103,19 +103,17 @@ FALSE.}
 }
 \value{
 A list with the following components:
-  \itemize{
-  \item beta: a matrix of generalized lasso coefficients, of dimension =
+  \item{beta}{Matrix of generalized lasso coefficients, of dimension =
   (number of features + 1) x (number of quantile levels) assuming
   \code{intercept=TRUE}, else (number of features) x (number of quantile
-  levels). Note: these coefficients will always be on the appropriate scale;
+  levels). Note}{these coefficients will always be on the appropriate scale;
   they are always on the scale of original features, even if
-  \code{standardize=TRUE}
-  \item status: vector of status flags returned by Gurobi's or GLPK's LP
-  solver, of length = (number of quantile levels)
-  \item tau, lambda: vectors of tau and lambda values used
-  \item weights, intercept, ..., jitter: values of these other arguments
-  used  in the function call
-  }
+  \code{standardize=TRUE}}
+  \item{status}{Vector of status flags returned by Gurobi's or GLPK's LP
+  solver, of length = (number of quantile levels)}
+  \item{tau,lambda}{Vectors of tau and lambda values used}
+  \item{weights,intercept,...,jitter}{Values of these other arguments
+  used in the function call}
 }
 \description{
 Compute quantile generalized lasso solutions.

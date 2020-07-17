@@ -20,18 +20,16 @@
 #'   be excluded. 
 #'
 #' @return A list with the following components:
-#'   \itemize{
-#'   \item beta: a matrix of lasso coefficients, of dimension = (number of
+#'   \item{beta}{Matrix of lasso coefficients, of dimension = (number of
 #'   features + 1) x (number of quantile levels) assuming \code{intercept=TRUE},
 #'   else (number of features) x (number of quantile levels). Note: these
 #'   coefficients will always be on the appropriate scale; they are always on
-#'   the scale of original features, even if \code{standardize=TRUE}
-#'   \item status: vector of status flags returned by Gurobi's or GLPK's LP
-#'   solver, of length = (number of quantile levels)
-#'   \item tau, lambda: vectors of tau and lambda values used
-#'   \item weights, no_pen_vars, ..., jitter: values of these other arguments 
-#'   used in the function call  
-#'   }
+#'   the scale of original features, even if \code{standardize=TRUE}}
+#'   \item{status}{Vector of status flags returned by Gurobi's or GLPK's LP
+#'   solver, of length = (number of quantile levels)}
+#'   \item{tau,lambda}{Vectors of tau and lambda values used}
+#'   \item{weights,no_pen_vars,...,jitter}{Values of these other arguments  
+#'   used in the function call}  
 #'
 #' @details This function solves the quantile lasso problem, for each pair of
 #'   quantile level \eqn{\tau} and tuning parameter \eqn{\lambda}:  
@@ -152,15 +150,13 @@ quantile_lasso_grid = function(x, y, tau, lambda=NULL, nlambda=30,
 #'   is NULL; if specified, takes priority over \code{nfolds}.
 #'
 #' @return A list with the following components:
-#'   \itemize{
-#'   \item qgl_obj: a \code{quantile_genlasso} object obtained by fitting on the
+#'   \item{qgl_obj}{A \code{quantile_genlasso} object obtained by fitting on the
 #'   full training set, at all quantile levels and their corresponding optimal  
-#'   lambda values
-#'   \item cv_mat: a matrix of cross-validation errors (as measured by quantile
+#'   lambda values}
+#'   \item{cv_mat}{Matrix of cross-validation errors (as measured by quantile
 #'   loss), of dimension (number of tuning parameter values) x (number of
-#'   quantile levels)
-#'   \item lambda_min: a vector of optimum lambda values, one per quantile level 
-#'   }
+#'   quantile levels)}
+#'   \item{lambda_min}{Vector of optimum lambda values, one per quantile level}
 #'
 #' @details All arguments through \code{verbose} (except for \code{nfolds} and
 #'   \code{train_test_inds}) are as in \code{quantile_lasso_grid} and

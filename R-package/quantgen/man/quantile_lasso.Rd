@@ -49,18 +49,16 @@ be excluded.}
 }
 \value{
 A list with the following components:
-  \itemize{
-  \item beta: a matrix of lasso coefficients, of dimension = (number of
+  \item{beta}{Matrix of lasso coefficients, of dimension = (number of
   features + 1) x (number of quantile levels) assuming \code{intercept=TRUE},
   else (number of features) x (number of quantile levels). Note: these
   coefficients will always be on the appropriate scale; they are always on
-  the scale of original features, even if \code{standardize=TRUE}
-  \item status: vector of status flags returned by Gurobi's or GLPK's LP
-  solver, of length = (number of quantile levels)
-  \item tau, lambda: vectors of tau and lambda values used
-  \item weights, no_pen_vars, ..., jitter: values of these other arguments 
-  used in the function call  
-  }
+  the scale of original features, even if \code{standardize=TRUE}}
+  \item{status}{Vector of status flags returned by Gurobi's or GLPK's LP
+  solver, of length = (number of quantile levels)}
+  \item{tau,lambda}{Vectors of tau and lambda values used}
+  \item{weights,no_pen_vars,...,jitter}{Values of these other arguments  
+  used in the function call}
 }
 \description{
 Compute quantile lasso solutions.

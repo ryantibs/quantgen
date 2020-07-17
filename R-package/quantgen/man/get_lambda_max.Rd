@@ -11,7 +11,7 @@ Compute lambda max for a quantile generalized lasso problem.
 }
 \details{
 This is not exact, but should be close to the exact value of
-  \eqn{lambda} such that \eqn{D \hat\beta = 0} at the solution
+  \eqn{\lambda} such that \eqn{D \hat\beta = 0} at the solution
   \eqn{\hat\beta} of the quantile generalized lasso problem. It is derived
   from the KKT conditions when \eqn{\tau = 1/2}.
 }

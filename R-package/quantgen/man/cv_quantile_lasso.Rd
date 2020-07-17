@@ -46,15 +46,13 @@ is NULL; if specified, takes priority over \code{nfolds}.}
 }
 \value{
 A list with the following components:
-  \itemize{
-  \item qgl_obj: a \code{quantile_genlasso} object obtained by fitting on the
+  \item{qgl_obj}{A \code{quantile_genlasso} object obtained by fitting on the
   full training set, at all quantile levels and their corresponding optimal  
-  lambda values
-  \item cv_mat: a matrix of cross-validation errors (as measured by quantile
+  lambda values}
+  \item{cv_mat}{Matrix of cross-validation errors (as measured by quantile
   loss), of dimension (number of tuning parameter values) x (number of
-  quantile levels)
-  \item lambda_min: a vector of optimum lambda values, one per quantile level 
-  }
+  quantile levels)}
+  \item{lambda_min}{Vector of optimum lambda values, one per quantile level}
 }
 \description{
 Run cross-validation for the quantile lasso on a tau by lambda grid. For each

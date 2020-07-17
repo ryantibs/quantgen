@@ -69,7 +69,7 @@ Gurobi or GLPK to solve any single quantile generalized lasso problem (for
 a single tau and lambda value). Default is NULL, which means unlimited
 time.}
 
-\item{params}{A list of control parameters to pass to Gurobi or GLPK. Default
+\item{params}{List of control parameters to pass to Gurobi or GLPK. Default
 is \code{list()} which means no additional parameters are passed. For
 example: with Gurobi, we can use \code{list(Threads=4)} to specify that
 Gurobi should use 4 threads when available. (Note that if a time limit is
@@ -81,15 +81,13 @@ FALSE.}
 }
 \value{
 A list with the following components:
-  \itemize{
-  \item alpha: vector or matrix of ensemble weights. If \code{tau_groups} has
+  \item{alpha}{Vector or matrix of ensemble weights. If \code{tau_groups} has
   only one unique label, then this is a vector of length = (number of
-  ensemble components); otherwise, it is a matrix, of dimension (number of
-  ensemble components) x (number of quantile levels)
-  \item tau: vector of quantile levels used
-  \item weights, tau_groups, ..., params: values of these other arguments
-  used in the function call
-  }
+  ensemble components); otherwise, it is a matrix, of dimension (number of 
+  ensemble components) x (number of quantile levels)}
+  \item{tau}{Vector of quantile levels used}
+  \item{weights,tau_groups,...,params}{Values of these other arguments 
+  used in the function call}
 }
 \description{
 Fit ensemble weights, given a set of quantile predictions.

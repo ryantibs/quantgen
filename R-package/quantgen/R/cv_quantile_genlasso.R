@@ -16,16 +16,14 @@
 #'   is NULL; if specified, takes priority over \code{nfolds}.
 #'
 #' @return A list with the following components:
-#'   \itemize{
-#'   \item qgl_obj: a \code{quantile_genlasso} object obtained by fitting on the
+#'   \item{qgl_obj}{A \code{quantile_genlasso} object obtained by fitting on the
 #'   full training set, at all quantile levels and their corresponding optimal
-#'   lambda values
-#'   \item cv_mat: a matrix of cross-validation errors (as measured by quantile
+#'   lambda values}
+#'   \item{cv_mat}{Matrix of cross-validation errors (as measured by quantile
 #'   loss), of dimension (number of tuning parameter values) x (number of
-#'   quantile levels)
-#'   \item lambda_min: a vector of optimum lambda values, one per quantile level
-#'   \item tau, lambda: the sequences of tau and lambda values considered
-#'   }
+#'   quantile levels)}
+#'   \item{lambda_min}{Vector of optimum lambda values, one per quantile level}
+#'   \item{tau,lambda}{Vectors of tau and lambda values used}
 #'
 #' @details All arguments through \code{verbose} (except for \code{nfolds} and
 #'   \code{train_test_inds}) are as in \code{quantile_genlasso_grid} and
