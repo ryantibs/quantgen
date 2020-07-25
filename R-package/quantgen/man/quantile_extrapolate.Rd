@@ -87,16 +87,16 @@ tails, nonparametric in the middle.
 \details{
 This function interpolates/extrapolates an initial sparser set of
   quantiles, say \eqn{q_1,\ldots,q_m} at the levels \eqn{\tau_1 < \ldots <
-  \tau_m} into a denser set, say \eqn{q_1^*,\ldots,q^*_n} at the levels
-  \eqn{\tau^*_1 < \ldots < \tau^*_n}.  At a high-level, the strategy is to
-  nonparametrically interpolate the quantiles whose levels fall in the
+  \tau_m} into a denser set of quantiles, say \eqn{q_1^*,\ldots,q^*_n} at the
+  levels \eqn{\tau^*_1 < \ldots < \tau^*_n}.  At a high-level, the strategy
+  is to nonparametrically interpolate the quantiles whose levels fall in the 
   interval \eqn{[\tau_1, \tau_m]}, and parametrically extrapolate the
-  quantiles whose levels fall in \eqn{[0, \tau_1)]} or \eqn{(\tau_m,
-  1]}. Call these the "middle" and "tail" strategies, respectively.
+  quantiles whose levels fall in \eqn{[0, \tau_1)} or \eqn{(\tau_m, 1]}. Let
+  us call these the "middle" and "tail" strategies, respectively. 
 
-  To give more details on the middle strategy: a monotone cubic spline
-  interpolant (if \code{middle="cubic"}) or a linear spline interpolant (if 
-  \code{middle="linear"}) is fit to the points
+  To give more details on the middle strategy: a monotone spline
+  interpolant---either a cubic spline (if \code{middle="cubic"}) or linear
+  spline interpolant (if \code{middle="linear"})---is fit to the points
   \deqn{(\tau_i,q_i), \; i=1,\ldots,m.}
   Denoting \eqn{f} by this interpolant, we then set
   \deqn{q^*_i = f(\tau^*_i), \;\; \tau^*_i \in [\tau_1, \tau_m].}
@@ -108,24 +108,25 @@ This function interpolates/extrapolates an initial sparser set of
   \eqn{\theta} represents the mean of the normal distribution (and the
   standard deviation is fixed at 1, as per the default in
   \code{qnorm}). Given this tail function, we then find the parameter value 
-  \eqn{\theta} that best matches the given quantile, and use this for
+  \eqn{\hat\theta} that best matches the given quantile, and use this for 
   extrapolation. That is, for the left tail, we first fit \eqn{\hat\theta}
   such that  
   \deqn{q(\tau_1; \hat\theta) \approx q_1}
   and we then set
   \deqn{q^*_i = q(\tau^*_i; \hat\theta), \;\; \tau^*_i < \tau_1.}
-  The right tail is similar. The fitting algorithm we use for determining
-  \eqn{\hat\theta} in each tail is a kind of discretized binary search. The
-  arguments \code{param0,param1} determine the left and right endpoints of
-  the interval used in the first round of the search (this interval typically
-  contracts, but can also expand as needed); the argument \code{grid_size} is
-  the number of discretization points to consider in each round of binary
-  search; the argument \code{tol} is the error tolerance for stopping; and
-  the argument \code{max_iter} is the maximum number of rounds to consider.
-  The fitting algorithm is robust to the case when the optimal parameter
-  value that matches the given quantile, as per the above display, is not
-  unqiue; in this case we take the mean of the optimal set of parameter
-  values. 
+  The right tail is similar.
+
+  The fitting algorithm used for determining \eqn{\hat\theta} in each tail is
+  a kind of iterative grid search that proceeds in "rounds". The arguments
+  \code{param0,param1} give the left and right endpoints of the initial
+  interval used in the first round of the search---this interval typically
+  contracts as the rounds proceed, but can also expand as needed; the
+  argument \code{grid_size} is the number of grid points to consider in each
+  round; the argument \code{tol} is the error tolerance for stopping; and the
+  argument \code{max_iter} is the maximum number of rounds to consider.  This
+  fitting algorithm is robust to the case when the optimal parameter value
+  that matches the given quantile, as per the above display, is not unqiue;
+  in this case we take the mean of the range of optimal parameter values.
   
   Finally, when the arguments \code{n_tau_left} and \code{n_tau_right} are
   changed from their defaults, then this changes the definition of the
