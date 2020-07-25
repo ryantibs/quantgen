@@ -39,15 +39,66 @@
 #'   monotone cubic spline interpolant is fit to the given quantiles, and used
 #'   to estimate quantiles in the middle. If "linear", then linear interpolation
 #'   is used to estimate quantiles in the middle.
-#' @param param0,param1 TODO
-#' @param grid_size,tol,maxiter TODO
+#' @param param0,param1,grid_size,tol,max_iter Arguments for the algorithm used
+#'   for parameter-fitting for tail extrapolation. See details.
 #'
 #' @return A matrix of dimension (number of rows in \code{qvals}) x (length of 
 #'   \code{tau_out}), where each row is the extrapolation of the set of
 #'   quantiles in the corresponding row of \code{qvals}, at the quantile levels 
 #'   specified in \code{tau_out}.
 #'
-#' @details TODO
+#' @details This function interpolates/extrapolates an initial sparser set of
+#'   quantiles, say \eqn{q_1,\ldots,q_m} at the levels \eqn{\tau_1 < \ldots <
+#'   \tau_m} into a denser set, say \eqn{q_1^*,\ldots,q^*_n} at the levels
+#'   \eqn{\tau^*_1 < \ldots < \tau^*_n}.  At a high-level, the strategy is to
+#'   nonparametrically interpolate the quantiles whose levels fall in the
+#'   interval \eqn{[\tau_1, \tau_m]}, and parametrically extrapolate the
+#'   quantiles whose levels fall in \eqn{[0, \tau_1)]} or \eqn{(\tau_m,
+#'   1]}. Call these the "middle" and "tail" strategies, respectively.
+#'
+#'   To give more details on the middle strategy: a monotone cubic spline
+#'   interpolant (if \code{middle="cubic"}) or a linear spline interpolant (if 
+#'   \code{middle="linear"}) is fit to the points
+#'   \deqn{(\tau_i,q_i), \; i=1,\ldots,m.}
+#'   Denoting \eqn{f} by this interpolant, we then set
+#'   \deqn{q^*_i = f(\tau^*_i), \;\; \tau^*_i \in [\tau_1, \tau_m].}
+#'
+#'   To give more details on the tail strategy: in each tail, left and right,
+#'   the user specifies a tail function \eqn{q(\tau; \theta)} which depends on a
+#'   parameter \eqn{\theta}. This is done via the functions \code{qfun_left} 
+#'   and \code{qfun_right}; the default is \code{qnorm} for both, in which case
+#'   \eqn{\theta} represents the mean of the normal distribution (and the
+#'   standard deviation is fixed at 1, as per the default in
+#'   \code{qnorm}). Given this tail function, we then find the parameter value 
+#'   \eqn{\theta} that best matches the given quantile, and use this for
+#'   extrapolation. That is, for the left tail, we first fit \eqn{\hat\theta}
+#'   such that  
+#'   \deqn{q(\tau_1; \hat\theta) \approx q_1}
+#'   and we then set
+#'   \deqn{q^*_i = q(\tau^*_i; \hat\theta), \;\; \tau^*_i < \tau_1.}
+#'   The right tail is similar. The fitting algorithm we use for determining
+#'   \eqn{\hat\theta} in each tail is a kind of discretized binary search. The
+#'   arguments \code{param0,param1} determine the left and right endpoints of
+#'   the interval used in the first round of the search (this interval typically
+#'   contracts, but can also expand as needed); the argument \code{grid_size} is
+#'   the number of discretization points to consider in each round of binary
+#'   search; the argument \code{tol} is the error tolerance for stopping; and
+#'   the argument \code{max_iter} is the maximum number of rounds to consider.
+#'   The fitting algorithm is robust to the case when the optimal parameter
+#'   value that matches the given quantile, as per the above display, is not
+#'   unqiue; in this case we take the mean of the optimal set of parameter
+#'   values. 
+#'   
+#'   Finally, when the arguments \code{n_tau_left} and \code{n_tau_right} are
+#'   changed from their defaults, then this changes the definition of the
+#'   "middle" and the "tail" ranges, but otherwise the analogous strategies are
+#'   employed. In fact, the middle strategy is unchanged, just applied to a
+#'   different range. The tail strategy is similar, but now in each tail, left
+#'   and right, we fit a separate parameter value \eqn{\hat\theta} for each
+#'   given quantile level in the tail range (for example, for each of the two
+#'   leftmost quantile levels if \code{ntau_left=2}), and then take the mean of
+#'   these parameters as a single parameter value on which to base tail
+#'   extrapolation.
 #' @export
 
 quantile_extrapolate = function(tau, qvals, tau_out=c(0.01, 0.025, seq(0.05,
