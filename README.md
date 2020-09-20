@@ -74,8 +74,9 @@ install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
 ### Install the `gurobi` R package
 
 - First install the latest version of Gurobi optimizer
-  [here](https://www.gurobi.com/products/gurobi-optimizer/); for academics, you
-  can obtain a free license
+  [here](https://www.gurobi.com/products/gurobi-optimizer/).
+  
+ - For academics, you can obtain a free license
   [here](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
 - Then follow
