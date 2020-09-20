@@ -154,8 +154,8 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
   # Transform beta back to original scale, if we standardized
   if (standardize) {
     if (!intercept) obj$beta = rbind(rep(0,length(tau)), obj$beta)
-    obj$beta[-1,] = Diagonal(x=1/sx) %*% obj$beta[-1,]
     obj$beta[1,] = obj$beta[1,] - (bx/sx) %*% obj$beta[-1,]
+    obj$beta[-1,] = Diagonal(x=1/sx) %*% obj$beta[-1,]
   }
 
   colnames(obj$beta) = sprintf("t=%g, l=%g", tau, lambda)
