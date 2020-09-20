@@ -59,8 +59,7 @@ For examples in the form of R notebooks, see:
   into richer set of quantiles at prediction time, and how to use noncrossing
   constraints.
 
--
-  [stacking_example.html](https://ryantibs.github.io/quantgen/stacking_example.html):
+- [stacking_example.html](https://ryantibs.github.io/quantgen/stacking_example.html):
   examples of how to use linear stacking to build quantile model ensembles.
 
 ### Install the `quantgen` R package
@@ -79,10 +78,6 @@ install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
   can obtain a free license
   [here](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
-- For R <= 3.6.1, you can then follow
+- Then follow
   [these instructions](https://www.gurobi.com/documentation/9.0/refman/ins_the_r_package.html)
   to install the `gurobi` R package.
-
-- For R > 3.6.1, you will have to download the `gurobi` R package directly from
-  [this link](https://upload.gurobi.com/gurobiR/gurobi9.0.2_R.tar.gz), and build
-  it yourself.  (It is apparently not yet fully released/supported by Gurobi.)
