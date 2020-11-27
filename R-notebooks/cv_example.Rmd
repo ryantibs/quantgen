@@ -1,0 +1,164 @@
+---
+title: "Cross-Validation for Quantile Lasso"
+author: "Ryan Tibshirani"
+date: "June 7, 2020"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=5)
+```
+
+$$
+\newcommand{\argmin}{\mathop{\mathrm{argmin}}}
+\newcommand{\argmax}{\mathop{\mathrm{argmax}}}
+\newcommand{\minimize}{\mathop{\mathrm{minimize}}}
+\newcommand{\st}{\mathop{\mathrm{subject\,\,to}}}
+$$
+
+Problem setup
+===
+
+Consider the problem 
+$$
+\minimize_{\beta_0,\beta} \; \sum_{i=1}^n \psi_\tau(y_i - \beta_0 - x_i^T \beta) + \lambda \|\beta\|_1
+$$
+where 
+$$
+\psi_\tau(v) = \max\{\tau v, (\tau-1) v)\},
+$$
+often called the "pinball" or "tilted $\ell_1$" loss, for a quantile level $\tau \in (0,1)$. With multiple quantile levels $\tau_k$, $k=1,\ldots,r$, we can simply solve the quantile lasso problem separately for each $\tau_k$.
+
+Cross-validation
+===
+
+Suppose we have multiple quantile levels $\tau_k$, $k=1,\ldots,r$ of interest, and we allow  one tuning parameter per quantile level $\lambda_k$, $k=1,\ldots,r$. We seek to minimize the cross-validation (CV) error over the choices of tuning parameters,
+$$
+\sum_{k=1}^r \sum_{i=1}^n \psi_\tau\Big(y_i - \hat\beta_0(D_{-i}; \tau_k, \lambda_k) - x_i^T \hat\beta(D_{-i}; \tau_k, \lambda_k)\Big),
+$$
+where $\hat\beta_0(D; \tau, \lambda)$, $\hat\beta(D; \tau, \lambda)$ denotes the quantile lasso solution fit on a data set $D$, at quantile level $\tau$, and tuning parameter value $\lambda$. Above, for each $i=1,\ldots,n$, we use $D_{-i}$ to denote the CV training fold used for point $i$. We can do this just by separately optimizing, for each $k=1,\ldots,r$, the CV error 
+$$
+\sum_{i=1}^n \psi_\tau\Big(y_i - \hat\beta_0(D_{-i}; \tau_k, \lambda_k) - x_i^T \hat\beta(D_{-i}; \tau_k, \lambda_k)\Big),
+$$
+over $\lambda_k$. That is, this flexibility---allowing each quantile level its own tuning parameter value---is both statistically and computationlly favorable.
+
+Gaussian example
+===
+
+We show a simple example of CV with Gaussian regression data. We also show how to extrapolate to a new set of quantiles, and how to refit at a new set of quantiles.
+
+```{r}
+library(quantgen)
+
+set.seed(33)
+n = 500
+p = 50
+x = matrix(rnorm(n*p), n, p)
+mu = function(x) x[1] + x[2]
+y = apply(x, 1, mu) + rnorm(n)
+
+# Run CV, over just a few quantile levels 
+tau = c(0.1, 0.3, 0.5, 0.7, 0.9)
+cv_obj = cv_quantile_lasso(x, y, tau=tau, nlambda=30, nfolds=5, lp_solver="gurobi", verbose=TRUE, sort=TRUE)
+plot(cv_obj)
+
+# Refit at new quantile levels
+tau_new = c(0.01, 0.025, seq(0.05, 0.95, by=0.05), 0.975, 0.99)
+new_obj = refit_quantile_lasso(cv_obj, x, y, tau_new, lp_solver="gurobi", verbose=TRUE)
+
+# Predicted and extrapolated quantiles at a few values of x
+par(mfrow=c(1,3))
+for (i in 1:9) {
+  x0 = matrix(rnorm(p), nrow=1)
+  qtrue = qnorm(tau_new, mu(x0))
+  qpred1 = predict(cv_obj, x0, sort=TRUE)
+  qextr1 = quantile_extrapolate(tau, qpred1, tau_new, qfun_left=qnorm, qfun_right=qnorm)
+  qpred2 = predict(new_obj, x0, sort=TRUE)
+  plot(tau_new, qtrue, type="o", ylim=range(qtrue, qextr1, qpred2, na.rm=TRUE), ylab="Quantile")
+  lines(tau_new, qextr1, col=2, pch=20, type="o")
+  points(tau, qpred1, col=4, cex=1.5, lwd=2)
+  lines(tau_new, qpred2, col=3, pch=20, type="o")
+  legend("topleft", legend=c("True", "Predicted", "Extrapolated", "Predicted (refit)"), 
+         col=c(1,4,2,3), pch=c(21,21,20,20))
+}
+```
+
+Poisson example
+===
+
+We show another simple example of CV now with Poisson regression data. Through this, we can also demonstrate how to use built-in transform (and inverse transform) functionality. And again we show how to extrapolate to a new set of quantiles, and how to refit at a new set of quantiles.
+
+```{r}
+n = 500
+p = 50
+x = matrix(rnorm(n*p), n, p)
+mu = function(x) x[1] + x[2]
+y = rpois(n, exp(apply(x, 1, mu)))
+
+# Run CV, over just a few quantile levels 
+tau = c(0.1, 0.3, 0.5, 0.7, 0.9)
+cv_obj1 = cv_quantile_lasso(x, y, tau=tau, nlambda=30, nfolds=5, lp_solver="gurobi", verbose=TRUE, sort=TRUE)
+cv_obj2 = cv_quantile_lasso(x, y, tau=tau, nlambda=30, nfolds=5, lp_solver="gurobi", verbose=TRUE, sort=TRUE,
+                            transform=log_pad(a=1), inv_trans=inv_log_pad(a=1)) 
+plot(cv_obj1)
+plot(cv_obj2)
+
+# Refit at new quantile levels
+tau_new = c(0.01, 0.025, seq(0.05, 0.95, by=0.05), 0.975, 0.99)
+new_obj1 = refit_quantile_lasso(cv_obj1, x, y, tau_new, lp_solver="gurobi", verbose=TRUE)
+new_obj2 = refit_quantile_lasso(cv_obj2, x, y, tau_new, lp_solver="gurobi", verbose=TRUE)
+
+# Predicted and extrapolated quantiles at a few values of x
+par(mfrow=c(1,3))
+for (i in 1:9) {
+  x0 = matrix(rnorm(p), nrow=1)
+  qtrue = qpois(tau_new, exp(mu(x0)))
+  qpred1 = predict(cv_obj1, x0, sort=TRUE, nonneg=TRUE, round=TRUE)
+  qextr1 = quantile_extrapolate(tau, qpred1, tau_new, qfun_left=qpois, qfun_right=qpois, nonneg=TRUE, round=TRUE)
+  qpred2 = predict(cv_obj2, x0, sort=TRUE, nonneg=TRUE, round=TRUE)
+  qextr2 = quantile_extrapolate(tau, qpred2, tau_new, qfun_left=qpois, qfun_right=qpois, nonneg=TRUE, round=TRUE)
+  plot(tau_new, qtrue, type="o", ylim=range(qtrue, qextr1, qextr2, na.rm=TRUE), ylab="Quantile")
+  lines(tau_new, qextr1, col=2, pch=20, type="o")
+  points(tau, qpred1, col=4, cex=1.5, lwd=2)
+  lines(tau_new, qextr2, col=3, pch=20, type="o")
+  points(tau, qpred2, col=5, cex=1.5, lwd=2)
+  legend("topleft", legend=c("True", "Predicted", "Extrapolated", "Predicted (log)", "Extrapolated (log)"), 
+         col=c(1,4,2,5,3), pch=c(21,21,20,21,20))
+}
+
+# Refitted versions 
+par(mfrow=c(1,3))
+for (i in 1:9) {
+  x0 = matrix(rnorm(p), nrow=1)
+  qtrue = qpois(tau_new, exp(mu(x0)))
+  qpred3 = predict(new_obj1, x0, sort=TRUE, nonneg=TRUE, round=TRUE)
+  qpred4 = predict(new_obj2, x0, sort=TRUE, nonneg=TRUE, round=TRUE)
+  plot(tau_new, qtrue, type="o", ylim=range(qtrue, qpred3, qpred4, na.rm=TRUE), ylab="Quantile")
+  lines(tau_new, qpred3, col=3, pch=20, type="o")
+  lines(tau_new, qpred4, col=6, pch=20, type="o")
+  legend("topleft", legend=c("True", "Predicted (refit)", "Predicted (log, refit)"), col=c(1,3,6), pch=c(21,20,20))
+}
+```
+
+Noncrossing constraints
+===
+
+We refit the last CV object at new quantile levels, and additionally enforce noncrossing constraints. (Note that these noncrossing constraints can only be applied when the values in the `tau` vector being passed to `quantile_genlasso()` are distinct, and sorted in increasing order.)
+
+```{r}
+n0 = 9
+x0 = matrix(rnorm(n0*p), n0, p)
+new_obj3 = refit_quantile_lasso(cv_obj2, x, y, tau_new, noncross=TRUE, x0=rbind(x,x0), lp_solver="gurobi", verbose=TRUE)
+qpred1 = predict(new_obj2, x0, sort=FALSE, nonneg=TRUE, round=TRUE)
+qpred2 = predict(new_obj2, x0, sort=TRUE, nonneg=TRUE, round=TRUE) 
+qpred3 = predict(new_obj3, x0, sort=FALSE, nonneg=TRUE, round=TRUE) # Should be sorted already
+
+par(mfrow=c(1,3))
+for (i in 1:9) {
+  qtrue = qpois(tau_new, exp(mu(x0[i,])))
+  plot(tau_new, qtrue, type="o", ylim=range(qtrue, qpred1[i,], qpred2[i,], qpred3[i,], na.rm=TRUE), ylab="Quantile")
+  lines(tau_new, qpred1[i,], col=2, pch=20, type="o")
+  lines(tau_new, qpred2[i,], col=3, pch=20, type="o")
+  lines(tau_new, qpred3[i,], col=4, pch=20, type="o")
+  legend("topleft", legend=c("True", "Predicted", "Predicted (sort)", "Predicted (noncross)"), col=1:4, pch=c(21,20,20,20))
+}
+```

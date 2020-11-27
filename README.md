@@ -49,7 +49,10 @@ notebooks linked below.
 
 ### Documentation and examples
 
-For examples in the form of R notebooks, see:
+For full package documentation amd vignettes detailing basic useage, visit 
+[here](https://ryantibs.github.io/quantgen/).
+
+Beyond that, for examples in the form of R notebooks, see:
 
 - [simple_test.html](https://ryantibs.github.io/quantgen/simple_test.html):
   simple tests comparing the outputs and speeds of the two LP solvers to `rqPen`

@@ -1,0 +1,124 @@
+---
+title: "Simple Tests for Quantile Lasso"
+author: "Ryan Tibshirani"
+date: "June 7, 2020"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=5)
+```
+
+$$
+\newcommand{\argmin}{\mathop{\mathrm{argmin}}}
+\newcommand{\argmax}{\mathop{\mathrm{argmax}}}
+\newcommand{\minimize}{\mathop{\mathrm{minimize}}}
+\newcommand{\st}{\mathop{\mathrm{subject\,\,to}}}
+$$
+
+Problem setup
+===
+
+Consider the problem 
+$$
+\minimize_{\beta_0,\beta} \; \sum_{i=1}^n \psi_\tau(y_i - \beta_0 - x_i^T \beta) + \lambda \|\beta\|_1
+$$
+where 
+$$
+\psi_\tau(v) = \max\{\tau v, (\tau-1) v)\},
+$$
+often called the "pinball" or "tilted $\ell_1$" loss, for a quantile level $\tau \in (0,1)$. We can rewrite this succintly letting $y$ be the response vector with elements $y_i$, and $X$ the predictor matrix with rows $x_i$, as
+$$
+\minimize_\beta \; \psi_\tau(y-X\beta) + \lambda \|\beta\|_1.
+$$
+Here we interpret $\psi_\tau$ as being applied componentwise to $y-X\beta$, and we suppress the notation for the intercept; as usual, to include an intercept, we just append a columns of 1s to $X$.
+
+LP reformulation
+===
+
+We can reformulate this as an LP:
+\begin{alignat*}{2}
+&\minimize_{\beta,u,v} \quad && 1_n^\top v + \lambda 1_p^\top u\\
+&\st \quad && v \geq \tau (y-X\beta), \\
+&&& v \geq (\tau-1) (y-X\beta), \\
+&&& u \geq \beta, \; u \geq -\beta.
+\end{alignat*}
+Here $1_k$ is the all 1s vector of dimension $k$, and all inequalities are interpreted componentwise. 
+
+Simple tests
+===
+
+We run a bunch of simple tests against `rqPen`.
+
+```{r}
+library(rqPen)
+library(quantgen)
+
+set.seed(33)
+n = 500
+p = 50
+x = matrix(rnorm(n*p), n, p)
+x0 = matrix(rnorm(n*p), n,)
+mu = function(x) x[1] + x[2]
+y = apply(x, 1, mu) + rnorm(n)
+
+tau = 0.8
+lambda = sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
+
+# No intercept, no standardize
+a1 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="gurobi")
+a2 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="glpk")
+a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=FALSE)
+max(abs(coef(a1)-coef(a3)))
+max(abs(coef(a2)-coef(a3)))
+max(abs(predict(a1,x0) - predict(a3,x0)))
+max(abs(predict(a2,x0) - predict(a3,x0)))
+
+# Yes intercept, no standardize
+a1 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=FALSE, lp_solver="gurobi")
+a2 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=FALSE, lp_solver="glpk")
+a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=TRUE, scalex=FALSE)
+max(abs(coef(a1)-coef(a3)))
+max(abs(coef(a2)-coef(a3)))
+max(abs(predict(a1,x0) - predict(a3,x0)))
+max(abs(predict(a2,x0) - predict(a3,x0)))
+
+# No intercept, yes standardize
+a1 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=TRUE, lp_solver="gurobi")
+a2 = quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=TRUE, lp_solver="glpk")
+a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=TRUE)
+max(abs(coef(a1)[-1]-coef(a3)))
+max(abs(coef(a2)[-1]-coef(a3)))
+max(abs(predict(a1,x0) - predict(a3,x0)))
+max(abs(predict(a2,x0) - predict(a3,x0)))
+# I think that rqPen is forgetting to add the result of centering the x's back into the intercept
+
+# Yes intercept, yes standardize
+a1 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=TRUE, lp_solver="gurobi")
+a2 = quantile_lasso(x, y, tau, lambda, intercept=TRUE, standardize=TRUE, lp_solver="glpk")
+a3 = rq.lasso.fit(x, y, tau, lambda/n, intercept=TRUE, scalex=TRUE)
+max(abs(coef(a1)[-1]-coef(a3)[-1]))
+max(abs(coef(a2)[-1]-coef(a3)[-1]))
+max(abs(predict(a1,x0) - predict(a3,x0)))
+max(abs(predict(a2,x0) - predict(a3,x0)))
+# I think that rqPen is forgetting to add the result of centering the x's back into the intercept
+```
+
+Speed comparison
+===
+
+On a bigger problem, we compare speeds across LP solvers (Gurobi and GLPK), and also `rqPen`.
+
+```{r}
+n = 2000
+p = 1000
+x = matrix(rnorm(n*p), n, p)
+mu = function(x) x[1] + x[2]
+y = apply(x, 1, mu) + rnorm(n)
+
+tau = 0.8
+lambda = sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
+
+system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="gurobi", verbose=TRUE))[3]
+system.time(quantile_lasso(x, y, tau, lambda, intercept=FALSE, standardize=FALSE, lp_solver="glpk", verbose=TRUE))[3]
+system.time(rq.lasso.fit(x, y, tau, lambda/n, intercept=FALSE, scalex=FALSE))[3]
+```
