@@ -2,6 +2,8 @@ destination: ../../docs/
 
 home:
   links:
+    - text: Ryan Tibshirani
+      href: https://www.stat.cmu.edu/~ryantibs/
     - text: Delphi Group
       href: https://delphi.cmu.edu/
 
@@ -11,7 +13,9 @@ articles:
     navbar: ~
     contents:
       - quantgen
-      - stacking_example
-      #- simple_test
-      #- cv_example
+      - cross_validation
+      - noncrossing_constraints
+      - quantile_extrapolation
+      - quantile_stacking 
+      - mathematical_details
 

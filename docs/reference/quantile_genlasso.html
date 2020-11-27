@@ -98,13 +98,30 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/stacking_example.html">1. Quantile Stacking</a>
+      <a href="../articles/cross_validation.html">1. Cross-validation</a>
+    </li>
+    <li>
+      <a href="../articles/noncrossing_constraints.html">2. Noncrossing constraints</a>
+    </li>
+    <li>
+      <a href="../articles/quantile_extrapolation.html">3. Quantile extrapolation</a>
+    </li>
+    <li>
+      <a href="../articles/quantile_stacking.html">4. Quantile stacking</a>
+    </li>
+    <li>
+      <a href="../articles/mathematical_details.html">5. Mathematical details</a>
     </li>
   </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/ryantibs/quantgen/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -119,7 +136,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Quantile generalized lasso</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/ryantibs/quantgen/blob/master/R/quantile_genlasso.R'><code>R/quantile_genlasso.R</code></a></small>
     <div class="hidden name"><code>quantile_genlasso.Rd</code></div>
     </div>
 
@@ -127,26 +144,26 @@
     <p>Compute quantile generalized lasso solutions.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>quantile_genlasso</span><span class='op'>(</span>
-  <span class='va'>x</span>,
-  <span class='va'>y</span>,
-  <span class='va'>d</span>,
-  <span class='va'>tau</span>,
-  <span class='va'>lambda</span>,
-  weights <span class='op'>=</span> <span class='cn'>NULL</span>,
-  intercept <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  standardize <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  noncross <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  x0 <span class='op'>=</span> <span class='cn'>NULL</span>,
-  lp_solver <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"glpk"</span>, <span class='st'>"gurobi"</span><span class='op'>)</span>,
-  time_limit <span class='op'>=</span> <span class='cn'>NULL</span>,
-  warm_starts <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  params <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
-  transform <span class='op'>=</span> <span class='cn'>NULL</span>,
-  inv_trans <span class='op'>=</span> <span class='cn'>NULL</span>,
-  jitter <span class='op'>=</span> <span class='cn'>NULL</span>,
-  verbose <span class='op'>=</span> <span class='cn'>FALSE</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>quantile_genlasso</span>(
+  <span class='no'>x</span>,
+  <span class='no'>y</span>,
+  <span class='no'>d</span>,
+  <span class='no'>tau</span>,
+  <span class='no'>lambda</span>,
+  <span class='kw'>weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>noncross</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>x0</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>lp_solver</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"glpk"</span>, <span class='st'>"gurobi"</span>),
+  <span class='kw'>time_limit</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>warm_starts</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>params</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>transform</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>inv_trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>jitter</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -298,9 +315,6 @@ FALSE.</p></td>
 <p>Either problem is readily converted into a linear program (LP), and solved
   using either Gurobi (which is free for academic use, and generally fast) or
   GLPK (which free for everyone, but slower).</p>
-    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
-
-    <p>Ryan Tibshirani</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -317,7 +331,7 @@ FALSE.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

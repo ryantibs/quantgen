@@ -1,0 +1,10 @@
+---
+title: 3. Quantile extrapolation
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{3. Quantile extrapolation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+TODO

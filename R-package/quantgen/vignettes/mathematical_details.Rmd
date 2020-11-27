@@ -1,0 +1,10 @@
+---
+title: 5. Mathematical details
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{5. Mathematical details}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+TODO

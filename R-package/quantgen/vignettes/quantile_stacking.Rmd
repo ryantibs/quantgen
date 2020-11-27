@@ -1,0 +1,10 @@
+---
+title: 4. Quantile stacking
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{4. Quantile stacking}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+TODO

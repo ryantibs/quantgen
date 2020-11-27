@@ -1,0 +1,10 @@
+---
+title: 2. Noncrossing constraints
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{2. Noncrossing constraints}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+TODO

@@ -1,15 +1,11 @@
 ---
-title: Getting Started with quantgen
+title: Getting started with quantgen
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with quantgen}
+  %\VignetteIndexEntry{Getting started with quantgen}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-```{r, include=FALSE}
-knitr::opts_chunk$set(fig.width=10, fig.height=5)
-```
 
 $$
 \newcommand{\argmin}{\mathop{\mathrm{argmin}}}
@@ -18,5 +14,125 @@ $$
 \newcommand{\st}{\mathop{\mathrm{subject\,\,to}}}
 $$
 
-TEXT HERE
-===
+This package provides tools for generalized quantile modeling: regularized 
+quantile regression (with generalized lasso penalties and noncrossing 
+constraints), cross-validation, quantile extrapolation, and quantile ensembles. 
+
+## Installing
+
+This package is not on CRAN yet, so it can be installed using the
+[`devtools`](https://cran.r-project.org/package=devtools) package:
+
+```{r, eval = FALSE}
+devtools::install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
+```
+
+Building the vignettes takes a substantial amount of time. They are not included
+in the package by default. If you want to include vignettes (for local access), 
+then you can use:
+
+```{r, eval = FALSE}
+devtools::install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen",
+                         build_vignettes=TRUE, dependencies=TRUE)
+```
+
+## Quantile lasso
+
+Here we give some basic examples of how to fit a quantile lasso model. For
+details on how this problem is defined (and how `quantgen` casts it into a 
+linear program), see the [mathematical details vignette]. 
+
+To fit a quantile lasso model, we can use `quantile_lasso()`. Below, we do so
+at the quantile level $\tau = 0.8$: 
+
+```{r}
+library(quantgen)
+
+set.seed(0)
+n = 100
+p = 10
+x = matrix(rnorm(n*p), n, p)
+x0 = rnorm(p)
+mu = function(x) 2 + x[1] + x[2]
+y = apply(x, 1, mu) + rnorm(n)
+
+tau = 0.8
+lambda = 2 * sqrt(get_lambda_max(x, y, Matrix::Diagonal(p)))
+obj = quantile_lasso(x, y, tau=tau, lambda=lambda)
+
+class(obj)
+round(coef(obj), 3) # Vector of length p + 1 (first entry is the intercept)
+predict(obj, newx=x0)
+```
+
+The default in `quantile_lasso()` is to include an intercept in the model (via
+`intercept = TRUE`) and to standardize the predictors (to have zero mean and 
+unit norm, via `standardize = TRUE`). **Important note** (obvious in hindsight, 
+but important nonetheless): in a quantile model, the intercept cannot be omitted
+by simply centering the response and the predictors, as it can in a standard 
+regression model. The intercept depends critically on the quantile level $\tau$.
+Above, the fact that the estimated intercept exceeds 2 is *not* an instance of 
+poor estimation in the quantile lasso model, but reflects the gap between the 
+level 0.8 and 0.5 quantiles of the standard normal distribution (note that 
+`qnorm(0.8)` `$\approx 0.84$).
+
+The `get_lambda_max()` function computes (approximately) the effective maximum 
+of the regularization path for a penalized quantile model with $\tau = 0.5$,
+given a predictor matrix, response vector, and penalty matrix. In the case of 
+the lasso, the penalty matrix is the identity.
+
+We can see that the `quantile_lasso()` function returns an object of class 
+`quantile_lasso` (inherited from `quantile_genlasso`), and comes with associated
+utilities `coef()` and `predict()`.
+
+## Multiple quantiles
+
+To fit solutions at multiple quantile levels, we can simply pass a vector for 
+the `tau` argument:
+
+```{r}
+tau_vec = c(0.1, 0.5, 0.9)
+obj = quantile_lasso(x, y, tau=tau_vec, lambda=lambda)
+
+round(coef(obj), 3) # Matrix of dimension (p + 1) x (number of tau values)
+predict(obj, newx=x0)
+```
+
+To fit solutions at multiple tuning parameter values, we can also pass a vector 
+for the `lambda` argument, in which case `quantile_lasso()` internally recycles 
+the `tau` and `lambda` arguments so that they have equal length, and then solves 
+separate quantile lasso problems, each with a quantile level `tau[i]` and tuning
+parameter `lambda[i]`. The two most common use cases are to pass a single value
+for `tau` and a vector for `lambda`, or to pass a vector for `tau` and a single
+value for `lambda`. 
+
+## Tau x lambda grid
+
+Solving quantile lasso problems over a two-dimensional grid of quantile levels
+and tuning parameter values is most convenient with `quantile_lasso_grid()`. 
+In this function, passing `lambda` is optional; when not specified, the function 
+`quantile_lasso_grid()` internally sets `lambda` to be a vector of length
+`nlambda = 30`, log-spaced between the value computed by `get_lambda_max()`
+and `lambda_min_ratio = 0.001` times this value. 
+
+```{r}
+obj = quantile_lasso_grid(x, y, tau_vec)
+
+dim(coef(obj)) # Matrix of dimension (p + 1) x (number of tau and lambda pairs)
+dim(predict(obj, new=x0)) # Array of dimension (number of x0 points) x (number 
+                          # of lambda values) x (number of tau values)
+```
+
+## Other options
+
+The `quantile_lasso()` function is a special case of its a parent function
+`quantile_genlasso()`, which allows for specification of a general penalty
+matrix. Both `quantile_lasso()` and `quantile_genlasso()` have several other
+options that you can read about in their documentation: 
+
+- observation weights, which can be set via `weights`;
+- noncrossing constraints, which can be set via `noncross` and `x0`;
+- faster optimization using Gurobi (requires separate installation of the 
+  `gurobi` package), which can be set with `lp_solver`;
+- response transformation pre-optimization (and inverse transformation 
+  post-prediction), which can be set with `transform` (and `inv_trans`).

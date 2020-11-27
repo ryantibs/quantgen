@@ -3,9 +3,13 @@ Type: Package
 Title: Tools for generalized quantile modeling
 Version: 1.0.0
 Date: 2020-06-06
-Author: Ryan Tibshirani
-Maintainer: Ryan Tibshirani <ryantibs@stat.cmu.edu>
-Description: Tools for generalized quantile modeling: penalized quantile regression, noncrossing constraints, cross-validation, and ensembles.    
+Authors@R: person(given = "Ryan", family = "Tibshirani",
+           role = c("aut", "cre"), email = "ryantibs@cmu.edu")
+URL: https://ryantibs.github.io/quantgen/, https://github.com/ryantibs/quantgen/ 
+BugReports: https://github.com/ryantibs/quantgen/
+Description: Tools for generalized quantile modeling: regularized quantile 
+    regression (with generalized lasso penalties and noncrossing constraints), 
+    cross-validation, quantile extrapolation, and quantile ensembles.   
 Encoding: UTF-8
 License: GPL-2
 RoxygenNote: 7.1.1

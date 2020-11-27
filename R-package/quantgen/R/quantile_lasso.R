@@ -1,4 +1,4 @@
-#' Quantile lasso.
+#' Quantile lasso
 #'
 #' Compute quantile lasso solutions.
 #'

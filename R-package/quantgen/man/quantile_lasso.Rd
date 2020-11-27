@@ -2,7 +2,7 @@
 % Please edit documentation in R/quantile_lasso.R
 \name{quantile_lasso}
 \alias{quantile_lasso}
-\title{Quantile lasso.}
+\title{Quantile lasso}
 \usage{
 quantile_lasso(
   x,

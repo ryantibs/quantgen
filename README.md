@@ -1,23 +1,25 @@
 # quantgen
 
-Tools for generalized quantile modeling: penalized quantile regression,
-penalties, noncrossing constraints, cross-validation, and ensembles.
+This package provides tools for generalized quantile modeling: regularized 
+quantile regression (with generalized lasso penalties and noncrossing 
+constraints), cross-validation, quantile extrapolation, and quantile ensembles.  
 
-This main purpose of this repo is to support the development of
+Its original was to support the development of 
 [Delphi's](https://delphi.cmu.edu) COVID forecasts, and the development an
-ensemble out of the models submitted to the
-[COVID Forecast Hub](https://github.com/reichlab/covid19-forecast-hub/blob/master/README.md#the-covid-forecast-hub-team),
-which is a collaborative repo with COVID forecasts from many groups different
-(visualized [here](https://viz.covid19forecasthub.org)), and the data source
-behind the official
-[CDC COVID Forecasting page](https://www.cdc.gov/coronavirus/2019-ncov/covid-data/forecasting-us.html).  
+ensemble forecaster out of individual component models submitted to the
+[COVID Forecast Hub](https://github.com/reichlab/covid19-forecast-hub/). The
+latter is a collaborative repo organized by the Reich lab, containing COVID 
+forecasts from many groups (visualized 
+[here](https://viz.covid19forecasthub.org)), 
+and serves as the official data source behind the 
+[CDC's reports on COVID forecasting](https://www.cdc.gov/coronavirus/2019-ncov/covid-data/forecasting-us.html).  
 
 ### Summary of package tools 
 
-Briefly, the R package `quantgen` provides:
+The R package `quantgen` provides:
 
-- More general tools for quantile regression compared to existing R packages 
-  (to our knowledge), allowing for generalized lasso penalties, and noncrossing
+- Tools for quantile regression not found in existing R packages (to our 
+  knowledge), allowing for generalized lasso penalties, and noncrossing 
   constraints.
   
 - Tools for building quantile model ensembles via linear stacking, with weights
@@ -36,7 +38,7 @@ All quantile regression and stacking problems are reformulated as linear
 programs (LPs), and solved using one of two LP solvers:
 
 1. GLPK, the default, which is open-source, and available thorugh the `Rglpk`
-package.
+   package.
 
 2. Gurobi, which is not open-source but free for academic use, and available
    through the `gurobi` package (see below).
@@ -45,7 +47,7 @@ If at all possible, Gurobi should be used because it is much faster and more
 stable.  The mathematical details for how these LPs are formed are given in the
 notebooks linked below. 
 
-### Example R notebooks
+### Documentation and examples
 
 For examples in the form of R notebooks, see:
 
@@ -64,11 +66,11 @@ For examples in the form of R notebooks, see:
 
 ### Install the `quantgen` R package
 
-To install the `quantgen` R package directly from GitHub, run the following in R:
+To install the `quantgen` R package directly from GitHub, run the following in 
+R:
 
 ```{r}
-library(devtools)
-install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
+devtools::install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
 ```
 
 ### Install the `gurobi` R package

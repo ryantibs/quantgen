@@ -98,13 +98,30 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/stacking_example.html">1. Quantile Stacking</a>
+      <a href="../articles/cross_validation.html">1. Cross-validation</a>
+    </li>
+    <li>
+      <a href="../articles/noncrossing_constraints.html">2. Noncrossing constraints</a>
+    </li>
+    <li>
+      <a href="../articles/quantile_extrapolation.html">3. Quantile extrapolation</a>
+    </li>
+    <li>
+      <a href="../articles/quantile_stacking.html">4. Quantile stacking</a>
+    </li>
+    <li>
+      <a href="../articles/mathematical_details.html">5. Mathematical details</a>
     </li>
   </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/ryantibs/quantgen/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -119,7 +136,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Convenience function for uniform jitter</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/ryantibs/quantgen/blob/master/R/utils.R'><code>R/utils.R</code></a></small>
     <div class="hidden name"><code>unif_jitter.Rd</code></div>
     </div>
 
@@ -127,7 +144,7 @@
     <p>Function to generate random draws from \(\mathrm{Unif}[a,b]\).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>unif_jitter</span><span class='op'>(</span>a <span class='op'>=</span> <span class='fl'>0</span>, b <span class='op'>=</span> <span class='fl'>0.01</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>unif_jitter</span>(<span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>0.01</span>)</pre>
 
 
 
@@ -146,7 +163,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

@@ -158,7 +158,7 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
     obj$beta[-1,] = Diagonal(x=1/sx) %*% obj$beta[-1,]
   }
 
-  colnames(obj$beta) = sprintf("t=%g, l=%g", tau, lambda)
+  colnames(obj$beta) = sprintf("tau=%g, lam=%g", round(tau,2), round(lambda,2))
   obj = c(obj, enlist(tau, lambda, weights, intercept, standardize, lp_solver,
                       warm_starts, time_limit, params, transform, inv_trans,
                       jitter))
@@ -615,8 +615,8 @@ predict.quantile_genlasso_grid = function(object, newx, sort=FALSE, iso=FALSE,
   # Now format into an array
   z = array(z, dim=c(n0, length(unique(object$lambda)),
                      length(unique(object$tau)))) 
-  dimnames(z)[[2]] = sprintf("l=%g", unique(object$lambda))
-  dimnames(z)[[3]] = sprintf("t=%g", unique(object$tau))
+  dimnames(z)[[2]] = sprintf("lam=%g", round(unique(object$lambda),2))
+  dimnames(z)[[3]] = sprintf("tau=%g", round(unique(object$tau),2))
 
   # Run isotonic regression, sort, truncated, round, if we're asked to
   for (i in 1:dim(z)[1]) {

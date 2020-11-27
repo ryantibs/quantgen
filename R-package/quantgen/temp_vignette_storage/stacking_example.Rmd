@@ -1,8 +1,8 @@
 ---
-title: 1. Quantile Stacking
+title: 1. Cross-validation
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{1. Quantile Stacking}
+  %\VignetteIndexEntry{1. Cross-validation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

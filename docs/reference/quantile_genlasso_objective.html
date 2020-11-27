@@ -98,13 +98,30 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/stacking_example.html">1. Quantile Stacking</a>
+      <a href="../articles/cross_validation.html">1. Cross-validation</a>
+    </li>
+    <li>
+      <a href="../articles/noncrossing_constraints.html">2. Noncrossing constraints</a>
+    </li>
+    <li>
+      <a href="../articles/quantile_extrapolation.html">3. Quantile extrapolation</a>
+    </li>
+    <li>
+      <a href="../articles/quantile_stacking.html">4. Quantile stacking</a>
+    </li>
+    <li>
+      <a href="../articles/mathematical_details.html">5. Mathematical details</a>
     </li>
   </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/ryantibs/quantgen/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -119,7 +136,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Quantile generalized lasso objective</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/ryantibs/quantgen/blob/master/R/quantile_genlasso.R'><code>R/quantile_genlasso.R</code></a></small>
     <div class="hidden name"><code>quantile_genlasso_objective.Rd</code></div>
     </div>
 
@@ -127,7 +144,7 @@
     <p>Compute generalized lasso objective for a single tau and lambda value.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>quantile_genlasso_objective</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='va'>d</span>, <span class='va'>beta</span>, <span class='va'>tau</span>, <span class='va'>lambda</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>quantile_genlasso_objective</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='no'>d</span>, <span class='no'>beta</span>, <span class='no'>tau</span>, <span class='no'>lambda</span>)</pre>
 
 
 
@@ -146,7 +163,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>
