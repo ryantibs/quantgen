@@ -1,0 +1,17 @@
+destination: ../../docs/
+
+home:
+  links:
+    - text: Delphi Group
+      href: https://delphi.cmu.edu/
+
+articles:
+  - title: Using the package
+    desc: Basic usage and examples.
+    navbar: ~
+    contents:
+      - quantgen
+      - stacking_example
+      #- simple_test
+      #- cv_example
+

@@ -1,7 +1,10 @@
 ---
-title: "Quantile Stacking"
-author: "Ryan Tibshirani"
-date: "June 10, 2020"
+title: 1. Quantile Stacking
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{1. Quantile Stacking}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include=FALSE}

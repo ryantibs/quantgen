@@ -1,7 +1,10 @@
 ---
-title: "Cross-Validation for Quantile Lasso"
-author: "Ryan Tibshirani"
-date: "June 7, 2020"
+title: 3. Cross-Validation for Quantile Lasso
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{3. Cross-Validation for Quantile Lasso}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include=FALSE}

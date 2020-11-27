@@ -1,7 +1,10 @@
 ---
-title: "Simple Tests for Quantile Lasso"
-author: "Ryan Tibshirani"
-date: "June 7, 2020"
+title: 2. Simple Tests for Quantile Lasso
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{2. Simple Tests for Quantile Lasso}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include=FALSE}

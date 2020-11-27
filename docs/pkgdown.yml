@@ -1,0 +1,8 @@
+pandoc: 2.7.3
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  quantgen: quantgen.html
+  stacking_example: stacking_example.html
+last_built: 2020-11-26T07:42Z
+
