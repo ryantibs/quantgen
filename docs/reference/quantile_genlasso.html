@@ -259,8 +259,9 @@ solving the quantile generalized lasso; the second is the corresponding
 inverse transform. For example: for count data, we might want to model
 log(1+y) (which would be the transform, and the inverse transform would be
 exp(x)-1). Both <code>transform</code> and <code>inv_trans</code> should be
-vectorized. Convenience functions <code>log_pad</code> and <code>inv_log_pad</code> are
-provided.</p></td>
+vectorized. Convenience functions <code>log_pad</code> and <code>exp_pad</code> are
+provided (these are inverses), as well as <code>logit_pad</code> and
+<code>sigmd_pad</code> (these are inverses).</p></td>
     </tr>
     <tr>
       <th>jitter</th>

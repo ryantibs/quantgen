@@ -52,8 +52,9 @@
 #'   inverse transform. For example: for count data, we might want to model
 #'   log(1+y) (which would be the transform, and the inverse transform would be
 #'   exp(x)-1). Both \code{transform} and \code{inv_trans} should be
-#'   vectorized. Convenience functions \code{log_pad} and \code{inv_log_pad} are
-#'   provided.
+#'   vectorized. Convenience functions \code{log_pad} and \code{exp_pad} are
+#'   provided (these are inverses), as well as \code{logit_pad} and
+#'   \code{sigmd_pad} (these are inverses).
 #' @param jitter Function for applying random jitter to y, which might help
 #'   optimization. For example: for count data, there can be lots of ties (with
 #'   or without transformation of y), which can make optimization more

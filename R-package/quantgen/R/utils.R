@@ -80,18 +80,31 @@ quantile_loss = function(yhat, y, tau) {
   return(colSums(pmax(tau*(y-yhat), (tau-1)*(y-yhat)), na.rm=TRUE))
 }
 
-#' Convenience functions for log padding
+#' Convenience functions for log/exp mappings
 #'
-#' Functions to map \eqn{y \mapsto \log(a+y)} and \eqn{x \mapsto \exp(x)-a}.
+#' Returns functions that map \eqn{x \mapsto \log(ax+b)} and \eqn{x \mapsto 
+#' (\exp(x)-b)/a}. (These are inverses.)
 #'
 #' @export
 
-log_pad = function(a=1) function(y) log(a+y)
+log_pad = function(a=1, b=1) return(function(x) log(a*x+b))
 
 #' @rdname log_pad
 #' @export
-inv_log_pad = function(a=1) function(x) exp(x)-a
+exp_pad = function(a=1, b=1) return(function(x) (exp(x)-b)/a)
 
+#' Convenience functions for logit/sigmoid mappings
+#'
+#' Returns functions that map \eqn{x \mapsto \log(\frac{ax+b}{1-ax+b})} and
+#' \eqn{x \mapsto \frac{\exp(x)(1+b)-b}{a(1+\exp(x))}}. (These are inverses.)
+
+logit_pad = function(a=1, b=1) return(function(x) log((a*x+b) / (1-a*x+b)))
+
+#' @rdname logit_pad
+#' @export
+
+sigmd_pad = function(a=1, b=1) return(function(x) (exp(x) * (1+b)-b) /
+                                                  ((1+exp(x)) * a))
 #' Convenience function for uniform jitter
 #'
 #' Function to generate random draws from \eqn{\mathrm{Unif}[a,b]}.

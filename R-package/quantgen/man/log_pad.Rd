@@ -2,13 +2,14 @@
 % Please edit documentation in R/utils.R
 \name{log_pad}
 \alias{log_pad}
-\alias{inv_log_pad}
-\title{Convenience functions for log padding}
+\alias{exp_pad}
+\title{Convenience functions for log/exp mappings}
 \usage{
-log_pad(a = 1)
+log_pad(a = 1, b = 1)
 
-inv_log_pad(a = 1)
+exp_pad(a = 1, b = 1)
 }
 \description{
-Functions to map \eqn{y \mapsto \log(a+y)} and \eqn{x \mapsto \exp(x)-a}.
+Returns functions that map \eqn{x \mapsto \log(ax+b)} and \eqn{x \mapsto 
+(\exp(x)-b)/a}. (These are inverses.)
 }
