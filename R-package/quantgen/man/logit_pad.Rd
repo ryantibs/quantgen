@@ -5,9 +5,9 @@
 \alias{sigmd_pad}
 \title{Convenience functions for logit/sigmoid mappings}
 \usage{
-logit_pad(a = 1, b = 1)
+logit_pad(a = 1, b = 0.01)
 
-sigmd_pad(a = 1, b = 1)
+sigmd_pad(a = 1, b = 0.011)
 }
 \description{
 Returns functions that map \eqn{x \mapsto \log(\frac{ax+b}{1-ax+b})} and
