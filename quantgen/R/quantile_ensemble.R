@@ -105,7 +105,7 @@ quantile_ensemble = function(qarr, y, tau, weights=NULL,
   # Add an all 1s matrix to qarr, if we need to
   if (intercept) {
     a = array(NA, dim=c(n,p+1,r))
-    for (k in 1:r) a[,,k] = cbind(rep(1,n), qarr[,,k])
+    for (k in 1:r) a[,,k] = cbind(rep(1,n), `dim<-`(qarr[,,k], apply(qarr, 3, dim)[, 1]))
     qarr = a
     p = p+1
   }
@@ -120,17 +120,9 @@ quantile_ensemble = function(qarr, y, tau, weights=NULL,
   
   # Flexible stacking
   else {
-    # First properly set up q0, if there's noncrossing constraints 
-    if (noncross) {
-      # If there's no q0 passed, then just use the training points
-      if (is.null(q0)) q0 = qarr
-      # If there's one passed, then account for intercept if needed
-      if (!is.null(q0) && intercept) {
-        n0 = dim(q0)[1]; a0 = array(NA, dim=c(n0,p,r))
-        for (k in 1:r) a0[,,k] = cbind(rep(1,n0), q0[,,k])
-        q0 = a0
-      }
-    }
+    # First properly set up q0, if there's noncrossing constraints --
+    # if there's no q0 passed, then just use the training points
+    if (noncross && is.null(q0)) q0 = qarr
     obj = quantile_ensemble_flex(qarr=qarr, y=y, tau=tau, weights=weights,
                                  tau_groups=tau_groups, intercept=intercept,
                                  nonneg=nonneg, unit_sum=unit_sum,
@@ -519,7 +511,7 @@ predict.quantile_ensemble = function(object, newq, s=NULL, sort=TRUE, iso=FALSE,
   # Add an all 1s matrix to newq, if we need to
   if (object$intercept) {
     a = array(NA, dim=c(n0,p+1,r))
-    for (k in 1:r) a[,,k] = cbind(rep(1,n0), newq[,,k])
+    for (k in 1:r) a[,,k] = cbind(rep(1,n0), `dim<-`(newq[,,k], apply(newq, 3, dim)[, 1]))
     newq = a
     p = p+1
   }
