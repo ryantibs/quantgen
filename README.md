@@ -4,7 +4,7 @@ This package provides tools for generalized quantile modeling: regularized
 quantile regression (with generalized lasso penalties and noncrossing 
 constraints), cross-validation, quantile extrapolation, and quantile ensembles.  
 
-Its original was to support the development of 
+Its original goal was to support the development of 
 [Delphi's](https://delphi.cmu.edu) COVID forecasts, and the development an
 ensemble forecaster out of individual component models submitted to the
 [COVID Forecast Hub](https://github.com/reichlab/covid19-forecast-hub/). The
@@ -49,7 +49,7 @@ notebooks linked below.
 
 ### Documentation and examples
 
-For full package documentation amd vignettes detailing basic useage, visit 
+For full package documentation and vignettes detailing basic useage, visit 
 [here](https://ryantibs.github.io/quantgen/).
 
 Beyond that, for examples in the form of R notebooks, see:
