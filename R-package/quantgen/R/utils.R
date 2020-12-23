@@ -48,6 +48,12 @@ setup_xyd = function(x, y, d, intercept=TRUE, standardize=TRUE, transform=NULL) 
   bx = NULL
   sx = NULL
 
+  # Remove NA values present in x or y
+  good_inds = rowSums(is.na(x)) == 0 & !is.na(y)
+  x = x[good_inds,]
+  y = y[good_inds]
+  n = sum(good_inds)
+  
   # Standardize the columns of x, if we're asked to
   if (standardize) {
     bx = apply(x,2,mean)

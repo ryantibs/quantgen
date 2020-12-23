@@ -111,11 +111,6 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
                              lp_solver=c("glpk","gurobi"), time_limit=NULL,
                              warm_starts=TRUE, params=list(), transform=NULL,
                              inv_trans=NULL, jitter=NULL, verbose=FALSE) {
-  # Set up some basics
-  n = length(y); p = ncol(x); m = nrow(d)
-  if (is.null(weights)) weights = rep(1,n)
-  lp_solver = match.arg(lp_solver)
-
   # Set up x, y, d
   a = setup_xyd(x, y, d, intercept, standardize, transform)
   x = a$x
@@ -123,8 +118,13 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
   d = a$d
   sx = a$sx
   bx = a$bx
+  n = nrow(x)
   p = ncol(x)
   m = nrow(d)
+
+  # Set up some basics
+  if (is.null(weights)) weights = rep(1,n)
+  lp_solver = match.arg(lp_solver)
 
   # Recycle tau or lambda so that they're the same length
   if (length(tau) != length(lambda)) {
