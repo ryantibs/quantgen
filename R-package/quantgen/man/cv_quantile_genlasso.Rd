@@ -17,6 +17,8 @@ cv_quantile_genlasso(
   train_test_inds = NULL,
   intercept = TRUE,
   standardize = TRUE,
+  noncross = FALSE,
+  x0 = NULL,
   lp_solver = c("glpk", "gurobi"),
   time_limit = NULL,
   warm_starts = TRUE,
@@ -63,7 +65,11 @@ reported.
 \details{
 All arguments through \code{verbose} (except for \code{nfolds} and
   \code{train_test_inds}) are as in \code{quantile_genlasso_grid} and
-  \code{quantile_genlasso}. Past \code{verbose}, the arguments are as in
+  \code{quantile_genlasso}. Note that the \code{noncross} and \code{x0}
+  arguments are not passed to \code{quantile_genlasso_grid} for the
+  calculation of cross-validation errors and optimal lambda values; they are
+  only passed to \code{quantile_genlasso} for the final object that is fit to
+  the full training set. Past \code{verbose}, the arguments are as in
   \code{predict.quantile_genlasso}, and control what happens with the
   predictions made on the validation sets.
 }

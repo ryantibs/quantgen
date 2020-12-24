@@ -41,7 +41,8 @@ solutions. Default is a sequence of 23 quantile levels from 0.01 to 0.99.}
 estimated quantiles to be properly ordered across all quantile levels being
 considered. The default is FALSE. If TRUE, then noncrossing constraints are
 applied to the estimated quantiles at all points specified by the next
-argument \code{x0}.}
+argument \code{x0}. Note: this option only makes sense if the values in the
+\code{tau} vector are distinct, and sorted in increasing order.}
 
 \item{x0}{Matrix of points used to define the noncrossing
 constraints. Default is NULL, which means that we consider noncrossing

@@ -44,6 +44,6 @@ This function forms a \code{lambda} vector either determined by the
   quantile level \code{tau[i]} and tuning parameter value \code{lambda[j]},
   using the \code{quantile_lasso} function. All arguments (aside from
   \code{nlambda} and \code{lambda_min_ratio}) are as in the latter function;
-  noncrossing constraints are disallowed.  The associated \code{predict}
+  noncrossing constraints are disallowed. The associated \code{predict}
   function is just that for the \code{quantile_genlasso_grid} class.
 }

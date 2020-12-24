@@ -161,6 +161,8 @@ reported.</p>
   <span class='kw'>train_test_inds</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>noncross</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>x0</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>lp_solver</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"glpk"</span>, <span class='st'>"gurobi"</span>),
   <span class='kw'>time_limit</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>warm_starts</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
@@ -212,7 +214,11 @@ is NULL; if specified, takes priority over <code>nfolds</code>.</p></td>
 
     <p>All arguments through <code>verbose</code> (except for <code>nfolds</code> and
   <code>train_test_inds</code>) are as in <code>quantile_genlasso_grid</code> and
-  <code>quantile_genlasso</code>. Past <code>verbose</code>, the arguments are as in
+  <code>quantile_genlasso</code>. Note that the <code>noncross</code> and <code>x0</code>
+  arguments are not passed to <code>quantile_genlasso_grid</code> for the
+  calculation of cross-validation errors and optimal lambda values; they are
+  only passed to <code>quantile_genlasso</code> for the final object that is fit to
+  the full training set. Past <code>verbose</code>, the arguments are as in
   <code>predict.quantile_genlasso</code>, and control what happens with the
   predictions made on the validation sets.</p>
 

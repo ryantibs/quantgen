@@ -17,6 +17,8 @@ cv_quantile_lasso(
   train_test_inds = NULL,
   intercept = TRUE,
   standardize = TRUE,
+  noncross = FALSE,
+  x0 = NULL,
   lp_solver = c("glpk", "gurobi"),
   time_limit = NULL,
   warm_starts = TRUE,
@@ -46,7 +48,7 @@ is NULL; if specified, takes priority over \code{nfolds}.}
 }
 \value{
 A list with the following components:
-  \item{qgl_obj}{A \code{quantile_genlasso} object obtained by fitting on the
+  \item{qgl_obj}{A \code{quantile_lasso} object obtained by fitting on the
   full training set, at all quantile levels and their corresponding optimal  
   lambda values}
   \item{cv_mat}{Matrix of cross-validation errors (as measured by quantile
@@ -61,7 +63,12 @@ tau, the lambda value minimizing the cross-validation error is reported.
 \details{
 All arguments through \code{verbose} (except for \code{nfolds} and
   \code{train_test_inds}) are as in \code{quantile_lasso_grid} and
-  \code{quantile_lasso}. Past \code{verbose}, the arguments are as in
+  \code{quantile_lasso}. Note that the \code{noncross} and \code{x0}
+  arguments are not passed to \code{quantile_lasso_grid} for the calculation
+  of cross-validation errors and optimal lambda values; they are only passed
+  to \code{quantile_lasso} for the final object that is fit to the full
+  training set. Past \code{verbose}, the arguments are as in
   \code{predict.quantile_lasso}, and control what happens with the
-  predictions made on the validation sets.
+  predictions made on the validation sets. The associated \code{predict}
+  function is just that for the \code{cv_quantile_genlasso} class.
 }

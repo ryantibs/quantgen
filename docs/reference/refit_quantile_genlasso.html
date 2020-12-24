@@ -197,7 +197,8 @@ solutions. Default is a sequence of 23 quantile levels from 0.01 to 0.99.</p></t
 estimated quantiles to be properly ordered across all quantile levels being
 considered. The default is FALSE. If TRUE, then noncrossing constraints are
 applied to the estimated quantiles at all points specified by the next
-argument <code>x0</code>.</p></td>
+argument <code>x0</code>. Note: this option only makes sense if the values in the
+<code>tau</code> vector are distinct, and sorted in increasing order.</p></td>
     </tr>
     <tr>
       <th>x0</th>
