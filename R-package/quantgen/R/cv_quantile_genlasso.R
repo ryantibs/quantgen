@@ -44,7 +44,7 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                 jitter=NULL, verbose=FALSE, sort=FALSE,
                                 iso=FALSE, nonneg=FALSE, round=FALSE) {
   # Set up some basics
-  n = length(y); p = ncol(x); m = nrow(d)
+  n = nrow(x); p = ncol(x); m = nrow(d)
   if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
 
@@ -99,19 +99,20 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
     lambda_min[j] = lambda[which.min(cv_mat[,j])]
   }
 
-  # Adjust optimum lambdas for difference in training set sizes
-  lambda_min_adj = lambda_min * nfolds / (nfolds - 1)
+  # Adjustment factor for optimum lambdas, accounting for training set sizes
+  # within CV
+  adj = n / sapply(train, length)
   
   # Fit quantile genlasso object on full training set, with optimum lambdas
   if (verbose) cat("Refitting on full training set with optimum lambdas ...\n")
-  qgl_obj = quantile_genlasso(x=x, y=y, d=d, tau=tau, lambda=lambda_min_adj,
+  qgl_obj = quantile_genlasso(x=x, y=y, d=d, tau=tau, lambda=lambda*adj,
                               weights=weights, intercept=intercept,
                               standardize=standardize, noncross=FALSE, x0=NULL,
                               lp_solver=lp_solver, time_limit=time_limit,
                               warm_starts=warm_starts, params=params,
                               transform=transform, inv_trans=inv_trans,
                               jitter=jitter, verbose=verbose)
-  obj = enlist(qgl_obj, cv_mat, lambda_min, tau, lambda, nfolds)
+  obj = enlist(qgl_obj, cv_mat, lambda_min, tau, lambda, adj)
   class(obj) = "cv_quantile_genlasso"
   return(obj)
 }
@@ -207,7 +208,7 @@ refit_quantile_genlasso = function(obj, x, y, d, tau_new=c(0.01, 0.025,
                                    verbose=FALSE) {
   # For each new tau, find the nearest tau, and use its CV-optimal lambda
   tau = obj$tau
-  lambda = obj$lambda_min * obj$nfolds / (obj$nfolds - 1)
+  lambda = obj$lambda_min * adj # Adjust for training set sizes within CV
   tau_mat = matrix(rep(tau, length(tau_new)), nrow=length(tau))
   tau_new_mat = matrix(rep(tau_new, each=length(tau)), nrow=length(tau))
   lambda_new = lambda[max.row(-abs(tau_mat - tau_new_mat))]

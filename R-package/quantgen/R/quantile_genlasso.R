@@ -493,7 +493,7 @@ quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
 
 get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("glpk","gurobi")) {
   # Set up some basic objects that we will need
-  n = length(y); p = ncol(x); m = nrow(d)
+  n = nrow(x); p = ncol(x); m = nrow(d)
   if (is.null(weights)) weights = rep(1,n)
   lp_solver = match.arg(lp_solver)
   Zmm = Matrix(0,m,m,sparse=TRUE); Imm = Diagonal(m)
