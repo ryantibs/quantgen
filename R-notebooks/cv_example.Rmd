@@ -74,7 +74,7 @@ for (i in 1:9) {
   qextr1 = quantile_extrapolate(tau, qpred1, tau_new, qfun_left=qnorm, qfun_right=qnorm)
   qpred2 = predict(new_obj, x0, sort=TRUE)
   plot(tau_new, qtrue, type="o", ylim=range(qtrue, qextr1, qpred2, na.rm=TRUE), ylab="Quantile")
-  lines(tau_new, qextr1, col=2, pch=20, type="o")
+  #lines(tau_new, qextr1, col=2, pch=20, type="o")
   points(tau, qpred1, col=4, cex=1.5, lwd=2)
   lines(tau_new, qpred2, col=3, pch=20, type="o")
   legend("topleft", legend=c("True", "Predicted", "Extrapolated", "Predicted (refit)"), 
