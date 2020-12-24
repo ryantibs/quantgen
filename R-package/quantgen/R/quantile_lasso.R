@@ -101,7 +101,7 @@ quantile_lasso = function(x, y, tau, lambda, weights=NULL, no_pen_vars=c(),
 #'   quantile level \code{tau[i]} and tuning parameter value \code{lambda[j]},
 #'   using the \code{quantile_lasso} function. All arguments (aside from
 #'   \code{nlambda} and \code{lambda_min_ratio}) are as in the latter function;
-#'   noncrossing constraints are disallowed.  The associated \code{predict}
+#'   noncrossing constraints are disallowed. The associated \code{predict}
 #'   function is just that for the \code{quantile_genlasso_grid} class.
 #' 
 #' @export
@@ -150,7 +150,7 @@ quantile_lasso_grid = function(x, y, tau, lambda=NULL, nlambda=30,
 #'   is NULL; if specified, takes priority over \code{nfolds}.
 #'
 #' @return A list with the following components:
-#'   \item{qgl_obj}{A \code{quantile_genlasso} object obtained by fitting on the
+#'   \item{qgl_obj}{A \code{quantile_lasso} object obtained by fitting on the
 #'   full training set, at all quantile levels and their corresponding optimal  
 #'   lambda values}
 #'   \item{cv_mat}{Matrix of cross-validation errors (as measured by quantile
@@ -160,20 +160,26 @@ quantile_lasso_grid = function(x, y, tau, lambda=NULL, nlambda=30,
 #'
 #' @details All arguments through \code{verbose} (except for \code{nfolds} and
 #'   \code{train_test_inds}) are as in \code{quantile_lasso_grid} and
-#'   \code{quantile_lasso}. Past \code{verbose}, the arguments are as in
+#'   \code{quantile_lasso}. Note that the \code{noncross} and \code{x0}
+#'   arguments are not passed to \code{quantile_lasso_grid} for the calculation
+#'   of cross-validation errors and optimal lambda values; they are only passed
+#'   to \code{quantile_lasso} for the final object that is fit to the full
+#'   training set. Past \code{verbose}, the arguments are as in
 #'   \code{predict.quantile_lasso}, and control what happens with the
-#'   predictions made on the validation sets.
+#'   predictions made on the validation sets. The associated \code{predict}
+#'   function is just that for the \code{cv_quantile_genlasso} class.   
 #' 
 #' @export
 
 cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
                              lambda_min_ratio=1e-3, weights=NULL,
                              no_pen_vars=c(), nfolds=5, train_test_inds=NULL,
-                             intercept=TRUE, standardize=TRUE,
-                             lp_solver=c("glpk","gurobi"), time_limit=NULL,
-                             warm_starts=TRUE, params=list(), transform=NULL,
-                             inv_trans=NULL, jitter=NULL, verbose=FALSE,
-                             sort=FALSE, iso=FALSE, nonneg=FALSE, round=FALSE) {  
+                             intercept=TRUE, standardize=TRUE, noncross=FALSE,
+                             x0=NULL, lp_solver=c("glpk","gurobi"),
+                             time_limit=NULL, warm_starts=TRUE, params=list(),
+                             transform=NULL, inv_trans=NULL, jitter=NULL,
+                             verbose=FALSE, sort=FALSE, iso=FALSE, nonneg=FALSE,
+                             round=FALSE) { 
   # Define an identity penalty matrix 
   d = Diagonal(ncol(x))
   if (length(no_pen_vars) > 0) d = d[-no_pen_vars,]
@@ -184,11 +190,12 @@ cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
                              weights=weights, nfolds=nfolds,
                              train_test_inds=train_test_inds,
                              intercept=intercept, standardize=standardize,
-                             lp_solver=lp_solver, time_limit=time_limit,
-                             warm_starts=warm_starts, params=params,
-                             transform=transform, inv_trans=inv_trans,
-                             jitter=jitter, verbose=verbose, sort=sort, iso=iso,
-                             nonneg=nonneg, round=round)
+                             noncross=noncross, x0=x0, lp_solver=lp_solver,
+                             time_limit=time_limit, warm_starts=warm_starts,
+                             params=params, transform=transform,
+                             inv_trans=inv_trans, jitter=jitter,
+                             verbose=verbose, sort=sort, iso=iso, nonneg=nonneg,
+                             round=round)
   class(obj) = c("cv_quantile_lasso", class(obj))
   return(obj)
 }
