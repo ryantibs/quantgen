@@ -111,20 +111,22 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
                              lp_solver=c("glpk","gurobi"), time_limit=NULL,
                              warm_starts=TRUE, params=list(), transform=NULL,
                              inv_trans=NULL, jitter=NULL, verbose=FALSE) {
-  # Set up x, y, d
-  a = setup_xyd(x, y, d, intercept, standardize, transform)
+  # Check LP solver
+  lp_solver = match.arg(lp_solver)
+  
+  # Set up x, y, d, weights
+  a = setup_xyd(x, y, d, weights, intercept, standardize, transform)
   x = a$x
   y = a$y
   d = a$d
   sx = a$sx
   bx = a$bx
+  weights = a$weights
+
+  # Problem dimensions
   n = nrow(x)
   p = ncol(x)
   m = nrow(d)
-
-  # Set up some basics
-  if (is.null(weights)) weights = rep(1,n)
-  lp_solver = match.arg(lp_solver)
 
   # Recycle tau or lambda so that they're the same length
   if (length(tau) != length(lambda)) {
@@ -448,8 +450,7 @@ quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                   warm_starts=TRUE, params=list(),
                                   transform=NULL, inv_trans=NULL, jitter=NULL,
                                   verbose=FALSE) {
-  # Set up some basics
-  if (is.null(weights)) weights = rep(1,length(y))
+  # Check LP solver
   lp_solver = match.arg(lp_solver)
 
   # Set the lambda sequence, if we need to
@@ -561,13 +562,12 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("glpk","gurobi")) {
 get_lambda_seq = function(x, y, d, nlambda, lambda_min_ratio, weights=NULL,
                           intercept=TRUE, standardize=TRUE,
                           lp_solver=c("glpk","gurobi"), transform=NULL) {
-  # Set up some basics
-  if (is.null(weights)) weights = rep(1,length(y))
+  # Check LP solver
   lp_solver = match.arg(lp_solver)
 
   # Set up x, y, d
-  a = setup_xyd(x, y, d, intercept, standardize, transform)
-  x = a$x; y = a$y; d = a$d
+  a = setup_xyd(x, y, d, weights, intercept, standardize, transform)
+  x = a$x; y = a$y; d = a$d; weights = a$weights
 
   # Compute lambda max then form and return a lambda sequence
   lambda_max = get_lambda_max(x, y, d, weights, lp_solver)

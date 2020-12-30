@@ -41,18 +41,23 @@ enlist = function(...) {
 }
 
 # Setup function
-setup_xyd = function(x, y, d, intercept=TRUE, standardize=TRUE, transform=NULL) {
+setup_xyd = function(x, y, d, weights=NULL, intercept=TRUE, standardize=TRUE, 
+                     transform=NULL) {  
   n = nrow(x)
   p = ncol(x)
   m = nrow(d)
   bx = NULL
   sx = NULL
-
+  
   # Remove NA values present in x or y
   good_inds = rowSums(is.na(x)) == 0 & !is.na(y)
   x = x[good_inds,]
   y = y[good_inds]
   n = sum(good_inds)
+
+  # Configure weights
+  if (is.null(weights)) weights = rep(1,n)
+  else weights = weights[good_inds]
   
   # Standardize the columns of x, if we're asked to
   if (standardize) {
@@ -72,7 +77,7 @@ setup_xyd = function(x, y, d, intercept=TRUE, standardize=TRUE, transform=NULL) 
   # Transform y, if we're asked to
   if (!is.null(transform)) y = transform(y)
 
-  return(enlist(x, y, d, bx, sx))
+  return(enlist(x, y, d, bx, sx, weights))
 }
 
 #' Quantile loss

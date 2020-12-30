@@ -48,9 +48,7 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                 inv_trans=NULL, jitter=NULL, verbose=FALSE,
                                 sort=FALSE, iso=FALSE, nonneg=FALSE,
                                 round=FALSE) { 
-  # Set up some basics
-  n = nrow(x); p = ncol(x); m = nrow(d)
-  if (is.null(weights)) weights = rep(1,n)
+  # Check LP solver
   lp_solver = match.arg(lp_solver)
 
   # Set the lambda sequence, if we need to
@@ -68,7 +66,7 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
     nfolds = length(train)
   }
   else {
-    folds = rep(1:nfolds, n)[sample(n)]
+    folds = rep(1:nfolds, nrow(x))[sample(nrow(x))]
     train = test = vector(mode="list", length=nfolds)
     for (k in 1:nfolds) {
       train[[k]] = which(folds != k)
