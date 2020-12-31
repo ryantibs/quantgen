@@ -15,6 +15,8 @@ quantile_genlasso_grid(
   weights = NULL,
   intercept = TRUE,
   standardize = TRUE,
+  lb = -Inf,
+  ub = Inf,
   lp_solver = c("glpk", "gurobi"),
   time_limit = NULL,
   warm_starts = TRUE,

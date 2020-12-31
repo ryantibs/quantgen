@@ -61,8 +61,8 @@
 #' @export
 
 quantile_lasso = function(x, y, tau, lambda, weights=NULL, no_pen_vars=c(), 
-                          intercept=TRUE, standardize=TRUE, noncross=FALSE,
-                          x0=NULL, lp_solver=c("glpk","gurobi"),
+                          intercept=TRUE, standardize=TRUE, lb=-Inf, ub=Inf,
+                          noncross=FALSE, x0=NULL, lp_solver=c("glpk","gurobi"), 
                           time_limit=NULL, warm_starts=TRUE, params=list(),
                           transform=NULL, inv_trans=NULL, jitter=NULL,
                           verbose=FALSE) {
@@ -73,11 +73,11 @@ quantile_lasso = function(x, y, tau, lambda, weights=NULL, no_pen_vars=c(),
   # Now just call quantile_genlasso
   obj = quantile_genlasso(x=x, y=y, d=d, tau=tau, lambda=lambda,
                           weights=weights, intercept=intercept,
-                          standardize=standardize, noncross=noncross, x0=x0,
-                          lp_solver=lp_solver, time_limit=time_limit,
-                          warm_starts=warm_starts, params=params,
-                          transform=transform, inv_trans=inv_trans,
-                          jitter=jitter, verbose=verbose)
+                          standardize=standardize, lb=lb, ub=ub,
+                          noncross=noncross, x0=x0, lp_solver=lp_solver,
+                          time_limit=time_limit, warm_starts=warm_starts,
+                          params=params, transform=transform,
+                          inv_trans=inv_trans, jitter=jitter, verbose=verbose)
   class(obj) = c("quantile_lasso", class(obj))
   return(obj)
 }
@@ -109,10 +109,10 @@ quantile_lasso = function(x, y, tau, lambda, weights=NULL, no_pen_vars=c(),
 quantile_lasso_grid = function(x, y, tau, lambda=NULL, nlambda=30,
                                lambda_min_ratio=1e-3, weights=NULL,
                                no_pen_vars=c(), intercept=TRUE,
-                               standardize=TRUE, lp_solver=c("glpk","gurobi"), 
-                               time_limit=NULL, warm_starts=TRUE, params=list(),
-                               transform=NULL, inv_trans=NULL, jitter=NULL,
-                               verbose=FALSE) { 
+                               standardize=TRUE, lb=-Inf, ub=Inf,
+                               lp_solver=c("glpk","gurobi"), time_limit=NULL,
+                               warm_starts=TRUE, params=list(), transform=NULL,
+                               inv_trans=NULL, jitter=NULL, verbose=FALSE) {
   # Define an identity penalty matrix 
   d = Diagonal(ncol(x))
   if (length(no_pen_vars) > 0) d = d[-no_pen_vars,]
@@ -122,11 +122,11 @@ quantile_lasso_grid = function(x, y, tau, lambda=NULL, nlambda=30,
                                nlambda=nlambda,
                                lambda_min_ratio=lambda_min_ratio,
                                weights=weights, intercept=intercept,
-                               standardize=standardize, lp_solver=lp_solver,
-                               time_limit=time_limit, warm_starts=warm_starts,
-                               params=params, transform=transform,
-                               inv_trans=inv_trans, jitter=jitter,
-                               verbose=verbose)
+                               standardize=standardize, lb=lb, ub=ub,
+                               lp_solver=lp_solver, time_limit=time_limit,
+                               warm_starts=warm_starts, params=params,
+                               transform=transform, inv_trans=inv_trans,
+                               jitter=jitter, verbose=verbose)
   class(obj) = c("quantile_lasso_grid", class(obj))
   return(obj)
 }
@@ -174,12 +174,12 @@ quantile_lasso_grid = function(x, y, tau, lambda=NULL, nlambda=30,
 cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
                              lambda_min_ratio=1e-3, weights=NULL,
                              no_pen_vars=c(), nfolds=5, train_test_inds=NULL,
-                             intercept=TRUE, standardize=TRUE, noncross=FALSE,
-                             x0=NULL, lp_solver=c("glpk","gurobi"),
-                             time_limit=NULL, warm_starts=TRUE, params=list(),
-                             transform=NULL, inv_trans=NULL, jitter=NULL,
-                             verbose=FALSE, sort=FALSE, iso=FALSE, nonneg=FALSE,
-                             round=FALSE) { 
+                             intercept=TRUE, standardize=TRUE, lb=-Inf, ub=Inf,
+                             noncross=FALSE, x0=NULL,
+                             lp_solver=c("glpk","gurobi"), time_limit=NULL,
+                             warm_starts=TRUE, params=list(), transform=NULL,
+                             inv_trans=NULL, jitter=NULL, verbose=FALSE,
+                             sort=FALSE, iso=FALSE, nonneg=FALSE, round=FALSE) {
   # Define an identity penalty matrix 
   d = Diagonal(ncol(x))
   if (length(no_pen_vars) > 0) d = d[-no_pen_vars,]
@@ -190,12 +190,12 @@ cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
                              weights=weights, nfolds=nfolds,
                              train_test_inds=train_test_inds,
                              intercept=intercept, standardize=standardize,
-                             noncross=noncross, x0=x0, lp_solver=lp_solver,
-                             time_limit=time_limit, warm_starts=warm_starts,
-                             params=params, transform=transform,
-                             inv_trans=inv_trans, jitter=jitter,
-                             verbose=verbose, sort=sort, iso=iso, nonneg=nonneg,
-                             round=round)
+                             lb=lb, ub=ub, noncross=noncross, x0=x0,
+                             lp_solver=lp_solver, time_limit=time_limit,
+                             warm_starts=warm_starts, params=params,
+                             transform=transform, inv_trans=inv_trans,
+                             jitter=jitter, verbose=verbose, sort=sort, iso=iso,
+                             nonneg=nonneg, round=round)
   class(obj) = c("cv_quantile_lasso", class(obj))
   return(obj)
 }
@@ -210,8 +210,7 @@ cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
 #' @param obj The \code{cv_quantile_lasso} object to start from.
 #' @param x Matrix of predictors.
 #' @param y Vector of responses.
-#' @param tau_new Vector of new quantile levels at which to fit new
-#'   solutions. Default is a sequence of 23 quantile levels from 0.01 to 0.99.
+#' @param tau_new Vector of new quantile levels at which to fit new solutions.  
 #' @param noncross Should noncrossing constraints be applied? These force the
 #'   estimated quantiles to be properly ordered across all quantile levels being
 #'   considered. The default is FALSE. If TRUE, then noncrossing constraints are
@@ -237,13 +236,13 @@ cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
 #' 
 #' @export
 
-refit_quantile_lasso = function(obj, x, y, tau_new=c(0.01, 0.025, seq(0.05,
-                                0.95, by=0.05), 0.975, 0.99), weights=NULL,
-                                no_pen_vars=NULL, intercept=TRUE,
-                                standardize=TRUE, noncross=FALSE, x0=NULL,
-                                lp_solver=NULL, time_limit=NULL,
-                                warm_starts=NULL, params=NULL, transform=NULL,
-                                inv_trans=NULL, jitter=NULL, verbose=FALSE) {
+refit_quantile_lasso = function(obj, x, y, tau_new, weights=NULL,
+                                no_pen_vars=NULL, intercept=NULL,
+                                standardize=NULL, lb=NULL, ub=NULL,
+                                noncross=FALSE, x0=NULL, lp_solver=NULL,
+                                time_limit=NULL, warm_starts=NULL, params=NULL,
+                                transform=NULL, inv_trans=NULL, jitter=NULL,
+                                verbose=FALSE) {
   # Define an identity penalty matrix 
   d = Diagonal(ncol(x))
   if (length(no_pen_vars) > 0) d = d[-no_pen_vars,]
@@ -251,9 +250,9 @@ refit_quantile_lasso = function(obj, x, y, tau_new=c(0.01, 0.025, seq(0.05,
   # Now just call refit_quantile_genlasso
   ql_obj = refit_quantile_genlasso(obj=obj, x=x, y=y, d=d, tau_new=tau_new,
                                    weights=weights, intercept=intercept,
-                                   standardize=standardize, noncross=noncross,
-                                   x0=x0, lp_solver=lp_solver,
-                                   time_limit=time_limit,
+                                   standardize=standardize, lb=lb, ub=ub,
+                                   noncross=noncross, x0=x0,
+                                   lp_solver=lp_solver, time_limit=time_limit,
                                    warm_starts=warm_starts, params=params,
                                    transform=transform, inv_trans=inv_trans,
                                    jitter=jitter, verbose=verbose)

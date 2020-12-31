@@ -8,11 +8,13 @@ refit_quantile_lasso(
   obj,
   x,
   y,
-  tau_new = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
+  tau_new,
   weights = NULL,
   no_pen_vars = NULL,
-  intercept = TRUE,
-  standardize = TRUE,
+  intercept = NULL,
+  standardize = NULL,
+  lb = NULL,
+  ub = NULL,
   noncross = FALSE,
   x0 = NULL,
   lp_solver = NULL,
@@ -32,8 +34,7 @@ refit_quantile_lasso(
 
 \item{y}{Vector of responses.}
 
-\item{tau_new}{Vector of new quantile levels at which to fit new
-solutions. Default is a sequence of 23 quantile levels from 0.01 to 0.99.}
+\item{tau_new}{Vector of new quantile levels at which to fit new solutions.}
 
 \item{noncross}{Should noncrossing constraints be applied? These force the
 estimated quantiles to be properly ordered across all quantile levels being

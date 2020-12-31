@@ -9,10 +9,12 @@ refit_quantile_genlasso(
   x,
   y,
   d,
-  tau_new = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
+  tau_new,
   weights = NULL,
-  intercept = TRUE,
-  standardize = TRUE,
+  intercept = NULL,
+  standardize = NULL,
+  lb = NULL,
+  ub = NULL,
   noncross = FALSE,
   x0 = NULL,
   lp_solver = NULL,
@@ -34,8 +36,7 @@ refit_quantile_genlasso(
 
 \item{d}{Matrix defining the generalized lasso penalty.}
 
-\item{tau_new}{Vector of new quantile levels at which to fit new
-solutions. Default is a sequence of 23 quantile levels from 0.01 to 0.99.}
+\item{tau_new}{Vector of new quantile levels at which to fit new solutions.}
 
 \item{noncross}{Should noncrossing constraints be applied? These force the
 estimated quantiles to be properly ordered across all quantile levels being
@@ -64,8 +65,8 @@ This function simply infers, for each quantile level in
   \code{tau_new}, a (very) roughly-CV-optimal tuning parameter value, then
   calls \code{quantile_genlasso} at the new quantile levels and corresponding
   tuning parameter values. If not specified, the arguments \code{weights},
-  \code{intercept}, \code{standardize}, \code{lp_solver}, \code{time_limit},
-  \code{warm_starts}, \code{params}, \code{transform}, \code{inv_transorm},
-  \code{jitter} are all inherited from the given \code{cv_quantile_genlasso}
-  object.
+  \code{intercept}, \code{standardize}, \code{lb}, \code{ub},
+  \code{lp_solver}, \code{time_limit}, \code{warm_starts}, \code{params},
+  \code{transform}, \code{inv_transorm}, \code{jitter} are all inherited from
+  the given \code{cv_quantile_genlasso} object.
 }

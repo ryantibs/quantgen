@@ -74,7 +74,7 @@ regression model. The intercept depends critically on the quantile level $\tau$.
 Above, the fact that the estimated intercept exceeds 2 is *not* an instance of 
 poor estimation in the quantile lasso model, but reflects the gap between the 
 level 0.8 and 0.5 quantiles of the standard normal distribution (note that 
-`qnorm(0.8)` `$\approx 0.84$).
+`qnorm(0.8)` $\approx 0.84$).
 
 The `get_lambda_max()` function computes (approximately) the effective maximum 
 of the regularization path for a penalized quantile model with $\tau = 0.5$,
@@ -118,9 +118,12 @@ and `lambda_min_ratio = 0.001` times this value.
 ```{r}
 obj = quantile_lasso_grid(x, y, tau_vec)
 
-dim(coef(obj)) # Matrix of dimension (p + 1) x (number of tau and lambda pairs)
-dim(predict(obj, new=x0)) # Array of dimension (number of x0 points) x (number 
-                          # of lambda values) x (number of tau values)
+# Matrix of dimension (p + 1) x (number of tau and lambda pairs)
+dim(coef(obj)) 
+
+# Array of dimension (number of x0 points) x (number of lambda values) x 
+# (number of tau values)
+dim(predict(obj, new=x0)) 
 ```
 
 ## Other options

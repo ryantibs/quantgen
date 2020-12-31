@@ -153,6 +153,8 @@
   <span class='kw'>weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>lb</span> <span class='kw'>=</span> -<span class='fl'>Inf</span>,
+  <span class='kw'>ub</span> <span class='kw'>=</span> <span class='fl'>Inf</span>,
   <span class='kw'>noncross</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>x0</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>lp_solver</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"glpk"</span>, <span class='st'>"gurobi"</span>),
@@ -208,7 +210,20 @@ Default is TRUE.</p></td>
     <tr>
       <th>standardize</th>
       <td><p>Should the predictors be standardized (to have zero mean
-and unit variance) before fitting?  Default is TRUE.</p></td>
+and unit variance) before fitting? Default is TRUE.</p></td>
+    </tr>
+    <tr>
+      <th>lb, ub</th>
+      <td><p>Lower and upper bounds, respectively, to place as constraints on
+the coefficients in the optimization problem. These can be constants (to
+place the same bound on each coefficient) or vectors of length equal to the
+number of predictors (to place a potentially different bound on each
+coefficient). Default is code-Inf and <code>Inf</code> for <code>lb</code> and
+<code>ub</code>, respectively, which effectively means no constraints are used.
+Two important notes: when <code>intercept</code> is TRUE, the constraints are
+*not* placed on the intercept; and when <code>standardize</code> is TRUE, the
+constraints are placed on the *standardized scale* (they are used in the 
+optimization problem whose predictors have been standardized).</p></td>
     </tr>
     <tr>
       <th>noncross</th>

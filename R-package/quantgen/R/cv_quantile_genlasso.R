@@ -42,12 +42,13 @@
 cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                 lambda_min_ratio=1e-3, weights=NULL, nfolds=5,
                                 train_test_inds=NULL, intercept=TRUE,
-                                standardize=TRUE, noncross=FALSE, x0=NULL,
+                                standardize=TRUE, lb=-Inf, ub=Inf,
+                                noncross=FALSE, x0=NULL,
                                 lp_solver=c("glpk","gurobi"), time_limit=NULL,
                                 warm_starts=TRUE, params=list(), transform=NULL,
                                 inv_trans=NULL, jitter=NULL, verbose=FALSE,
                                 sort=FALSE, iso=FALSE, nonneg=FALSE,
-                                round=FALSE) { 
+                                round=FALSE) {
   # Check LP solver
   lp_solver = match.arg(lp_solver)
 
@@ -87,10 +88,11 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                  lambda_min_ratio=NULL,
                                  weights=weights[train[[k]]],
                                  intercept=intercept, standardize=standardize,
-                                 lp_solver=lp_solver, time_limit=time_limit,
-                                 warm_starts=warm_starts, params=params,
-                                 transform=transform, inv_trans=inv_trans,
-                                 jitter=jitter, verbose=verbose)
+                                 lb=lb, ub=ub, lp_solver=lp_solver,
+                                 time_limit=time_limit, warm_starts=warm_starts,
+                                 params=params, transform=transform,
+                                 inv_trans=inv_trans, jitter=jitter,
+                                 verbose=verbose)
     # Predict on test set
     yhat[test[[k]],,] = predict(obj, x[test[[k]],,drop=FALSE], sort=sort,
                                 iso=iso, nonneg=nonneg, round=round)
@@ -110,11 +112,12 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
   if (verbose) cat("Refitting on full training set with optimum lambdas ...\n")
   qgl_obj = quantile_genlasso(x=x, y=y, d=d, tau=tau, lambda=lambda_min,
                               weights=weights, intercept=intercept,
-                              standardize=standardize, noncross=noncross, x0=x0,
-                              lp_solver=lp_solver, time_limit=time_limit,
-                              warm_starts=warm_starts, params=params,
-                              transform=transform, inv_trans=inv_trans,
-                              jitter=jitter, verbose=verbose)
+                              standardize=standardize, lb=lb, ub=ub,
+                              noncross=noncross, x0=x0, lp_solver=lp_solver,
+                              time_limit=time_limit, warm_starts=warm_starts,
+                              params=params, transform=transform,
+                              inv_trans=inv_trans, jitter=jitter,
+                              verbose=verbose)
   obj = enlist(qgl_obj, cv_mat, lambda_min, tau, lambda)
   class(obj) = "cv_quantile_genlasso"
   return(obj)
@@ -174,8 +177,7 @@ predict.cv_quantile_genlasso = function(object, newx, s=NULL, sort=FALSE,
 #' @param x Matrix of predictors.
 #' @param y Vector of responses.
 #' @param d Matrix defining the generalized lasso penalty.
-#' @param tau_new Vector of new quantile levels at which to fit new
-#'   solutions. Default is a sequence of 23 quantile levels from 0.01 to 0.99.
+#' @param tau_new Vector of new quantile levels at which to fit new solutions. 
 #' @param noncross Should noncrossing constraints be applied? These force the
 #'   estimated quantiles to be properly ordered across all quantile levels being
 #'   considered. The default is FALSE. If TRUE, then noncrossing constraints are
@@ -195,17 +197,16 @@ predict.cv_quantile_genlasso = function(object, newx, s=NULL, sort=FALSE,
 #'   \code{tau_new}, a (very) roughly-CV-optimal tuning parameter value, then
 #'   calls \code{quantile_genlasso} at the new quantile levels and corresponding
 #'   tuning parameter values. If not specified, the arguments \code{weights},
-#'   \code{intercept}, \code{standardize}, \code{lp_solver}, \code{time_limit},
-#'   \code{warm_starts}, \code{params}, \code{transform}, \code{inv_transorm},
-#'   \code{jitter} are all inherited from the given \code{cv_quantile_genlasso}
-#'   object.
+#'   \code{intercept}, \code{standardize}, \code{lb}, \code{ub},
+#'   \code{lp_solver}, \code{time_limit}, \code{warm_starts}, \code{params},
+#'   \code{transform}, \code{inv_transorm}, \code{jitter} are all inherited from
+#'   the given \code{cv_quantile_genlasso} object.
 #'
 #' @export
 
-refit_quantile_genlasso = function(obj, x, y, d, tau_new=c(0.01, 0.025,
-                                   seq(0.05, 0.95, by=0.05), 0.975, 0.99),
-                                   weights=NULL, intercept=TRUE,
-                                   standardize=TRUE, noncross=FALSE, x0=NULL,
+refit_quantile_genlasso = function(obj, x, y, d, tau_new, weights=NULL,
+                                   intercept=NULL, standardize=NULL, lb=NULL,
+                                   ub=NULL, noncross=FALSE, x0=NULL,
                                    lp_solver=NULL, time_limit=NULL,
                                    warm_starts=NULL, params=NULL,
                                    transform=NULL, inv_trans=NULL, jitter=NULL,
@@ -221,6 +222,8 @@ refit_quantile_genlasso = function(obj, x, y, d, tau_new=c(0.01, 0.025,
   if (is.null(weights)) weights = obj$qgl_obj$weights
   if (is.null(intercept)) intercept = obj$qgl_obj$intercept
   if (is.null(standardize)) standardize = obj$qgl_obj$standardize
+  if (is.null(lb)) lb = obj$qgl_obj$lb
+  if (is.null(ub)) ub = obj$qgl_obj$ub
   if (is.null(lp_solver)) lp_solver = obj$qgl_obj$lp_solver
   if (is.null(time_limit)) time_limit = obj$qgl_obj$time_limit
   if (is.null(warm_starts)) warm_starts = obj$qgl_obj$warm_starts
@@ -232,9 +235,9 @@ refit_quantile_genlasso = function(obj, x, y, d, tau_new=c(0.01, 0.025,
   # Now just call quantile_genlasso
   return(quantile_genlasso(x=x, y=y, d=d, tau=tau_new, lambda=lambda_new,
                            weights=weights, intercept=intercept,
-                           standardize=standardize, noncross=noncross, x0=x0,
-                           lp_solver=lp_solver, time_limit=time_limit,
-                           warm_starts=warm_starts, params=params,
-                           transform=transform, inv_trans=inv_trans,
-                           jitter=jitter, verbose=verbose))
+                           standardize=standardize, lb=lb, ub=ub,
+                           noncross=noncross, x0=x0, lp_solver=lp_solver,
+                           time_limit=time_limit, warm_starts=warm_starts,
+                           params=params, transform=transform,
+                           inv_trans=inv_trans, jitter=jitter, verbose=verbose))
 }

@@ -22,7 +22,17 @@
 #' @param intercept Should an intercept be included in the regression model?
 #'   Default is TRUE.
 #' @param standardize Should the predictors be standardized (to have zero mean
-#'   and unit variance) before fitting?  Default is TRUE.
+#'   and unit variance) before fitting? Default is TRUE.
+#' @param lb,ub Lower and upper bounds, respectively, to place as constraints on
+#'   the coefficients in the optimization problem. These can be constants (to
+#'   place the same bound on each coefficient) or vectors of length equal to the
+#'   number of predictors (to place a potentially different bound on each
+#'   coefficient). Default is code{-Inf} and \code{Inf} for \code{lb} and
+#'   \code{ub}, respectively, which effectively means no constraints are used.
+#'   Two important notes: when \code{intercept} is TRUE, the constraints are
+#'   *not* placed on the intercept; and when \code{standardize} is TRUE, the
+#'   constraints are placed on the *standardized scale* (they are used in the 
+#'   optimization problem whose predictors have been standardized).
 #' @param noncross Should noncrossing constraints be applied? These force the
 #'   estimated quantiles to be properly ordered across all quantile levels being
 #'   considered. The default is FALSE. If TRUE, then noncrossing constraints are
@@ -107,10 +117,11 @@
 #' @export
 
 quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
-                             standardize=TRUE, noncross=FALSE, x0=NULL,
-                             lp_solver=c("glpk","gurobi"), time_limit=NULL,
-                             warm_starts=TRUE, params=list(), transform=NULL,
-                             inv_trans=NULL, jitter=NULL, verbose=FALSE) {
+                             standardize=TRUE, lb=-Inf, ub=Inf, noncross=FALSE,
+                             x0=NULL, lp_solver=c("glpk","gurobi"),
+                             time_limit=NULL, warm_starts=TRUE, params=list(),
+                             transform=NULL, inv_trans=NULL, jitter=NULL,
+                             verbose=FALSE) { 
   # Check LP solver
   lp_solver = match.arg(lp_solver)
   
@@ -135,6 +146,11 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
     lambda = rep(lambda, length=k)
   }
 
+  # Recycle lb and ub to be length p, and adjust for an intercept if needed
+  lb_vec = rep(lb, length.out=p)
+  ub_vec = rep(ub, length.out=p)
+  if (intercept) { lb[1] = -Inf; ub[1] = Inf }
+
   # Properly set up x0, if there's noncrossing constraints 
   if (noncross) {
     # If there's no x0 passed, then just use the training points
@@ -149,10 +165,10 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
   
   # Solve the quantile generalized lasso LPs
   obj = quantile_genlasso_lp(x=x, y=y, d=d, tau=tau, lambda=lambda,
-                             weights=weights, noncross=noncross, x0=x0,
-                             lp_solver=lp_solver, time_limit=time_limit,
-                             warm_starts=warm_starts, params=params,
-                             jitter=jitter, verbose=verbose)
+                             weights=weights, lb=lb_vec, ub=ub_vec,
+                             noncross=noncross, x0=x0, lp_solver=lp_solver,
+                             time_limit=time_limit, warm_starts=warm_starts,
+                             params=params, jitter=jitter, verbose=verbose)
 
   # Transform beta back to original scale, if we standardized
   if (standardize) {
@@ -162,19 +178,20 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
   }
 
   colnames(obj$beta) = sprintf("tau=%g, lam=%g", round(tau,2), round(lambda,2))
-  obj = c(obj, enlist(tau, lambda, weights, intercept, standardize, lp_solver,
-                      warm_starts, time_limit, params, transform, inv_trans,
-                      jitter))
+  obj = c(obj, enlist(tau, lambda, weights, intercept, standardize, lb, ub,
+                      lp_solver, warm_starts, time_limit, params, transform,
+                      inv_trans, jitter)) 
   class(obj) = "quantile_genlasso"
   return(obj)
 }
 
 # Solve quantile generalized lasso problems using an LP solver.
 
-quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
-                                x0=NULL, lp_solver="gurobi", params=list(),
-                                warm_starts=TRUE, time_limit=time_limit,
-                                jitter=NULL, verbose=FALSE) {
+quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, lb, ub, 
+                                noncross=FALSE, x0=NULL, lp_solver="gurobi",
+                                params=list(), warm_starts=TRUE,
+                                time_limit=time_limit, jitter=NULL,
+                                verbose=FALSE) {
   # Set up some basic objects that we will need
   n = nrow(x); p = ncol(x); m = nrow(d)
   Inn = Diagonal(n); Imm = Diagonal(m)
@@ -202,7 +219,8 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
       verbose = FALSE
       params$LogToConsole = 1
     }
-    model$lb = c(rep(-Inf,p), rep(0,m), rep(0,n))
+    model$lb = c(lb, rep(0,m), rep(0,n))
+    model$ub = c(ub, rep(Inf,m), rep(Inf,n))
   }
 
   # GLPK setup
@@ -214,7 +232,8 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
       verbose = FALSE
       params$verbose = TRUE
     }
-    model$lb = list(lower=list(ind=1:p, val=rep(-Inf,p)))
+    model$bounds = list(lower=list(ind=1:p, val=lb),
+                        upper=list(ind=1:p, val=ub))
   }
 
   # Noncrossing setup
@@ -281,7 +300,7 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
       else {
         # Call GLPK's LP solver, store results
         a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                           rhs=model$rhs, bounds=model$lb, control=params)
+                           rhs=model$rhs, bounds=model$bounds, control=params)
         beta[,k] = a$solution[1:p]
         status[k] = a$status
       }
@@ -302,8 +321,9 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
 
     # Gurobi
     if (use_gurobi) {
-      # Extend lower bound parameter
+      # Extend lower and upper bound parameters
       model_big$lb = rep(model$lb, r)
+      model_big$ub = rep(model$ub, r)
 
       # Call Gurobi's LP solver, store results
       a = gurobi::gurobi(model=model_big, params=params)
@@ -315,13 +335,16 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, noncross=FALSE,
     # GLPK
     else {
       # Extend lower bound parameter
-      model_big$lb = list(lower=list(ind=rep(1:p, r) + rep(P*0:(r-1), each=p),
-                                     val=rep(-Inf, p*r)))
+      model_big$bounds = list(
+        lower=list(ind=rep(1:p, r) + rep(P*0:(r-1), each=p),
+                   val=rep(model$lower$val, r)),
+        upper=list(ind=rep(1:p, r) + rep(P*0:(r-1), each=p),
+                   val=rep(model$upper$val, r)))
       
       # Call GLPK's LP solver, store results
       a = Rglpk_solve_LP(obj=model_big$obj, mat=model_big$A,
                          dir=model_big$sense, rhs=model_big$rhs,
-                         bounds=model_big$lb, control=params) 
+                         bounds=model_big$bounds, control=params) 
       beta = Matrix(a$solution[rep(1:p, r) + rep(P*0:(r-1), each=p)], nrow=p,
                     ncol=r, sparse=TRUE) 
       status = a$status
@@ -445,11 +468,11 @@ predict.quantile_genlasso = function(object, newx, s=NULL, sort=FALSE,
 
 quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                   lambda_min_ratio=1e-3, weights=NULL,
-                                  intercept=TRUE, standardize=TRUE,
-                                  lp_solver=c("glpk","gurobi"), time_limit=NULL,
-                                  warm_starts=TRUE, params=list(),
-                                  transform=NULL, inv_trans=NULL, jitter=NULL,
-                                  verbose=FALSE) {
+                                  intercept=TRUE, standardize=TRUE, lb=-Inf,
+                                  ub=Inf, lp_solver=c("glpk","gurobi"),
+                                  time_limit=NULL, warm_starts=TRUE,
+                                  params=list(), transform=NULL, inv_trans=NULL,
+                                  jitter=NULL, verbose=FALSE) {
   # Check LP solver
   lp_solver = match.arg(lp_solver)
 
@@ -470,8 +493,8 @@ quantile_genlasso_grid = function(x, y, d, tau, lambda=NULL, nlambda=30,
   # Now just call quantile_genlasso
   obj = quantile_genlasso(x=x, y=y, d=d, tau=tau, lambda=lambda,
                           weights=weights, intercept=intercept,
-                          standardize=standardize, noncross=FALSE, x0=NULL,
-                          lp_solver=lp_solver, time_limit=time_limit,
+                          standardize=standardize, lb=lb, ub=ub, noncross=FALSE,
+                          x0=NULL, lp_solver=lp_solver, time_limit=time_limit,
                           warm_starts=warm_starts, params=params,
                           transform=transform, inv_trans=inv_trans,
                           jitter=jitter, verbose=verbose)
@@ -538,9 +561,9 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("glpk","gurobi")) {
   # GLPK
   else {
     model$sense = c(rep(">=", 2*m), rep("==", p))
-    model$lb = list(lower=list(ind=1:m, val=rep(-Inf,m)))
+    model$bounds = list(lower=list(ind=1:m, val=rep(-Inf,m)))
     a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
-                       rhs=model$rhs, bounds=model$lb)
+                       rhs=model$rhs, bounds=model$bounds)
     lambda_max = a$solution[m+1]
   }
 

@@ -17,6 +17,8 @@ cv_quantile_genlasso(
   train_test_inds = NULL,
   intercept = TRUE,
   standardize = TRUE,
+  lb = -Inf,
+  ub = Inf,
   noncross = FALSE,
   x0 = NULL,
   lp_solver = c("glpk", "gurobi"),

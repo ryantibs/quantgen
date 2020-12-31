@@ -13,6 +13,8 @@ quantile_genlasso(
   weights = NULL,
   intercept = TRUE,
   standardize = TRUE,
+  lb = -Inf,
+  ub = Inf,
   noncross = FALSE,
   x0 = NULL,
   lp_solver = c("glpk", "gurobi"),
@@ -52,7 +54,18 @@ observation.}
 Default is TRUE.}
 
 \item{standardize}{Should the predictors be standardized (to have zero mean
-and unit variance) before fitting?  Default is TRUE.}
+and unit variance) before fitting? Default is TRUE.}
+
+\item{lb, ub}{Lower and upper bounds, respectively, to place as constraints on
+the coefficients in the optimization problem. These can be constants (to
+place the same bound on each coefficient) or vectors of length equal to the
+number of predictors (to place a potentially different bound on each
+coefficient). Default is code{-Inf} and \code{Inf} for \code{lb} and
+\code{ub}, respectively, which effectively means no constraints are used.
+Two important notes: when \code{intercept} is TRUE, the constraints are
+*not* placed on the intercept; and when \code{standardize} is TRUE, the
+constraints are placed on the *standardized scale* (they are used in the 
+optimization problem whose predictors have been standardized).}
 
 \item{noncross}{Should noncrossing constraints be applied? These force the
 estimated quantiles to be properly ordered across all quantile levels being

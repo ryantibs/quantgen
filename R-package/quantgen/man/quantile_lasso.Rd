@@ -13,6 +13,8 @@ quantile_lasso(
   no_pen_vars = c(),
   intercept = TRUE,
   standardize = TRUE,
+  lb = -Inf,
+  ub = Inf,
   noncross = FALSE,
   x0 = NULL,
   lp_solver = c("glpk", "gurobi"),

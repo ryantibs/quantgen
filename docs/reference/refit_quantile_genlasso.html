@@ -151,10 +151,12 @@ an existing <code>cv_quantile_genlasso</code> object.</p>
   <span class='no'>x</span>,
   <span class='no'>y</span>,
   <span class='no'>d</span>,
-  <span class='kw'>tau_new</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.01</span>, <span class='fl'>0.025</span>, <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='fl'>0.05</span>, <span class='fl'>0.95</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>0.05</span>), <span class='fl'>0.975</span>, <span class='fl'>0.99</span>),
+  <span class='no'>tau_new</span>,
   <span class='kw'>weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>lb</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>ub</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>noncross</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>x0</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>lp_solver</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
@@ -188,8 +190,7 @@ an existing <code>cv_quantile_genlasso</code> object.</p>
     </tr>
     <tr>
       <th>tau_new</th>
-      <td><p>Vector of new quantile levels at which to fit new
-solutions. Default is a sequence of 23 quantile levels from 0.01 to 0.99.</p></td>
+      <td><p>Vector of new quantile levels at which to fit new solutions.</p></td>
     </tr>
     <tr>
       <th>noncross</th>
@@ -223,10 +224,10 @@ FALSE.</p></td>
   <code>tau_new</code>, a (very) roughly-CV-optimal tuning parameter value, then
   calls <code>quantile_genlasso</code> at the new quantile levels and corresponding
   tuning parameter values. If not specified, the arguments <code>weights</code>,
-  <code>intercept</code>, <code>standardize</code>, <code>lp_solver</code>, <code>time_limit</code>,
-  <code>warm_starts</code>, <code>params</code>, <code>transform</code>, <code>inv_transorm</code>,
-  <code>jitter</code> are all inherited from the given <code>cv_quantile_genlasso</code>
-  object.</p>
+  <code>intercept</code>, <code>standardize</code>, <code>lb</code>, <code>ub</code>,
+  <code>lp_solver</code>, <code>time_limit</code>, <code>warm_starts</code>, <code>params</code>,
+  <code>transform</code>, <code>inv_transorm</code>, <code>jitter</code> are all inherited from
+  the given <code>cv_quantile_genlasso</code> object.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
