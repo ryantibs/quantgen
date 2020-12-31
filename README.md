@@ -1,8 +1,9 @@
 # quantgen
 
-This package provides tools for generalized quantile modeling: regularized 
-quantile regression (with generalized lasso penalties and noncrossing 
-constraints), cross-validation, quantile extrapolation, and quantile ensembles.  
+The `quantgen` package provides tools for generalized quantile modeling:
+regularized quantile regression (with generalized lasso penalties and
+noncrossing constraints), cross-validation, quantile extrapolation, and quantile
+ensembles.
 
 Its original goal was to support the development of 
 [Delphi's](https://delphi.cmu.edu) COVID forecasts, and the development an
@@ -12,7 +13,7 @@ latter is a collaborative repo organized by the Reich lab, containing COVID
 forecasts from many groups (visualized 
 [here](https://viz.covid19forecasthub.org)), 
 and serves as the official data source behind the 
-[CDC's reports on COVID forecasting](https://www.cdc.gov/coronavirus/2019-ncov/covid-data/forecasting-us.html).  
+[CDC's reports on COVID forecasting](https://www.cdc.gov/coronavirus/2019-ncov/covid-data/forecasting-us.html).
 
 ### Summary of package tools 
 
@@ -32,6 +33,10 @@ The R package `quantgen` provides:
   distribution (monotone cubic spline interpolation), and parametric "in the
   tails" (with a tail behavior of the user's choosing).
 
+Consult the
+[package documentation and vignettes]((https://ryantibs.github.io/quantgen/) for 
+full details.
+
 ### Linear program solvers
 
 All quantile regression and stacking problems are reformulated as linear
@@ -47,12 +52,9 @@ If at all possible, Gurobi should be used because it is much faster and more
 stable.  The mathematical details for how these LPs are formed are given in the
 notebooks linked below. 
 
-### Documentation and examples
+### Example notebooks
 
-For full package documentation and vignettes detailing basic useage, visit 
-[here](https://ryantibs.github.io/quantgen/).
-
-Beyond that, for examples in the form of R notebooks, see:
+Beyond the vignettes, for examples in the form of R notebooks, see: 
 
 - [simple_test.html](https://ryantibs.github.io/quantgen/simple_test.html):
   simple tests comparing the outputs and speeds of the two LP solvers to `rqPen`
