@@ -74,12 +74,12 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
     }
   }
   
-  yhat = array(NA, dim=c(n, length(lambda), length(tau)))
+  yhat = array(NA, dim=c(nrow(x), length(lambda), length(tau)))
   for (k in 1:nfolds) {
     if (verbose) cat(sprintf("CV fold %i ...\n", k))
     # Adjustment factor for lambda values, accounting for the differences in
     # training set sizes
-    adj = length(train[[k]]) / n
+    adj = length(train[[k]]) / nrow(x)
   
     # Fit on training set
     obj = quantile_genlasso_grid(x=x[train[[k]],,drop=FALSE], y=y[train[[k]]],
