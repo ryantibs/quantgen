@@ -34,7 +34,7 @@ The R package `quantgen` provides:
   tails" (with a tail behavior of the user's choosing).
 
 Consult the
-[package documentation and vignettes]((https://ryantibs.github.io/quantgen/) for 
+[package documentation and vignettes](https://ryantibs.github.io/quantgen/) for 
 full details.
 
 ### Linear program solvers
