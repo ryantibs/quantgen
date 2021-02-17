@@ -281,22 +281,30 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   model$obj = c(rep(0,P), rep(weights, each=r))
 
   # Matrix of constraint coefficients
-  model$A = Matrix(0, nrow=2*N, ncol=P+N, sparse=TRUE)
   model$sense = model$rhs = rep(NA, 2*N)
 
   # First part of residual constraint
   for (k in 1:r) {
-    model$A[(k-1)*n + 1:n, (k-1)*p + 1:p] = tau[k] * qarr[,,k]
+    B = Matrix(0, nrow=n, ncol=P+N, sparse=TRUE)
+    B[1:n, (k-1)*p + 1:p] = tau[k] * qarr[,,k]
     model$sense[(k-1)*n + 1:n] = ">="
     model$rhs[(k-1)*n + 1:n] = tau[k] * y
+    if (k == 1) {
+      model$A = B
+    }
+    else {
+      model$A = rbind(model$A, B)
+    }
   }
   model$A[1:N, P + 1:N] = INN
 
   # Second part of residual constraint
   for (k in 1:r) {
-    model$A[(r+k-1)*n + 1:n, (k-1)*p + 1:p] = (tau[k]-1) * qarr[,,k]
+    B = Matrix(0, nrow=n, ncol=P+N, sparse=TRUE)
+    B[1:n, (k-1)*p + 1:p] = (tau[k]-1) * qarr[,,k]
     model$sense[(r+k-1)*n + 1:n] = ">="
     model$rhs[(r+k-1)*n + 1:n] = (tau[k]-1) * y
+    model$A = rbind(model$A, B)
   }
   model$A[N + 1:N, P + 1:N] = INN
 
