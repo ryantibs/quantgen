@@ -17,4 +17,8 @@ Imports:
     Matrix,
     Rglpk
 Suggests: 
-    gurobi
+    gurobi,
+    testthat,
+    mockery
+Config/testthat/edition: 3
+
