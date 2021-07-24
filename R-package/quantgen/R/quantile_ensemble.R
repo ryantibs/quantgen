@@ -434,8 +434,8 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
     i = do.call(c, A_i_parts[seq_len(A_part_ind)]),
     j = do.call(c, A_j_parts[seq_len(A_part_ind)]),
     x = do.call(c, A_x_parts[seq_len(A_part_ind)]),
-    dims=c(A_nrow, A_ncol),
-    giveCsparse=FALSE # faster than TRUE; solvers might expect Tsparse form
+    dims = c(A_nrow, A_ncol),
+    repr = "T" # faster than "C"; solvers might expect Tsparse form
   )
 
   # Call Gurobi's LP solver, store results
