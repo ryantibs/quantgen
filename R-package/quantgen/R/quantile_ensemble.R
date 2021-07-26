@@ -248,9 +248,16 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
                                   noncross=TRUE, q0=NULL,
                                   lp_solver=c("glpk","gurobi"), time_limit=NULL,
                                   params=list(), verbose=FALSE) {
+
+  # Check inputs
+
+  if (anyDuplicated(tau) != 0L || is.unsorted(tau) || any(tau < 0 | tau > 1)) {
+    stop ("Entries of `tau` must be distinct, sorted in increasing order, >=0, and <=1")
+  }
+
   if (intercept && noncross) {
     stop ("using multiple tau groups with intercept=TRUE and noncross=TRUE is currently unsupported")
-    ## (Matrix formation needs to be debugged or verified for this case.)
+    # (Matrix formation needs to be debugged or verified for this case.)
   }
 
   # Set up some basic objects that we will need
