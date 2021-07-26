@@ -430,12 +430,11 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   }
 
   # Build model$A from parts:
-  model$A = sparseMatrix(
-    i = do.call(c, A_i_parts[seq_len(A_part_ind)]),
-    j = do.call(c, A_j_parts[seq_len(A_part_ind)]),
-    x = do.call(c, A_x_parts[seq_len(A_part_ind)]),
-    dims = c(A_nrow, A_ncol),
-    repr = "T" # faster than "C"; solvers might expect Tsparse form
+  model$A = new("dgTMatrix", # `d`ouble-type entries, `g`eneral structure, `T`sparse (ijx format)
+    i = as.integer(do.call(c, A_i_parts[seq_len(A_part_ind)])) - 1L,
+    j = as.integer(do.call(c, A_j_parts[seq_len(A_part_ind)])) - 1L,
+    x = as.numeric(do.call(c, A_x_parts[seq_len(A_part_ind)])),
+    Dim = as.integer(c(A_nrow, A_ncol))
   )
 
   # Call Gurobi's LP solver, store results
