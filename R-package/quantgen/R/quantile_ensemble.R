@@ -87,6 +87,7 @@
 #'   \eqn{g}.
 #'
 #' @importFrom Rglpk Rglpk_solve_LP
+#' @importFrom Matrix sparseMatrix
 #' @export
 
 quantile_ensemble = function(qarr, y, tau, weights=NULL,
@@ -247,12 +248,31 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
                                   noncross=TRUE, q0=NULL,
                                   lp_solver=c("glpk","gurobi"), time_limit=NULL,
                                   params=list(), verbose=FALSE) {
+
+  # Check inputs
+
+  if (anyDuplicated(tau) != 0L || is.unsorted(tau) || any(tau < 0 | tau > 1)) {
+    stop ("Entries of `tau` must be distinct, sorted in increasing order, >=0, and <=1")
+  }
+
+  if (intercept && noncross) {
+    stop ("using multiple tau groups with intercept=TRUE and noncross=TRUE is currently unsupported")
+    # (Matrix formation needs to be debugged or verified for this case.)
+  }
+
   # Set up some basic objects that we will need
   n = dim(qarr)[1]
   p = dim(qarr)[2]
-  r = dim(qarr)[3]
-  N = n*r; P=p*r
-  INN = Diagonal(N)
+  r_using_taus = dim(qarr)[3]
+  labels = unique(tau_groups); num_labels = length(labels)
+  tau_group_runs = rle(tau_groups)
+  if (verbose && noncross && anyDuplicated(tau_group_runs[["values"]]) != 0L) {
+    warning('`noncross=TRUE` but `tau_groups` are interleaved; you may want to unify any interleaved tau groups to guarantee they will not cross for any test data (e.g., `tau_groups=c("a","b","a")` -> `tau_groups=c("ab","ab","ab")')
+  }
+  r_using_runs = length(tau_group_runs[["lengths"]])
+  tau_group_run_inds = rep(seq_len(r_using_runs), tau_group_runs[["lengths"]])
+  N_using_taus = n*r_using_taus # number of residual vars --- n per quantile level
+  P_using_runs = p*r_using_runs # number of coefficient vars --- p per tau group run
   model = list()
 
   # Determine LP solver
@@ -261,8 +281,8 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
     if (requireNamespace("gurobi", quietly=TRUE)) use_gurobi = TRUE
     else warning("gurobi R package not installed, using Rglpk instead.")
   }
-  
- # Gurobi setup
+
+  # Gurobi setup
   if (use_gurobi) {
     if (!is.null(time_limit)) params$TimeLimit = time_limit
     if (is.null(params$LogToConsole)) params$LogToConsole = 0
@@ -278,88 +298,156 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   }
 
   # Vector of objective coefficients
-  model$obj = c(rep(0,P), rep(weights, each=r))
+  model$obj = c(rep(0,P_using_runs), rep(weights, each=r_using_taus))
 
   # Matrix of constraint coefficients
-  model$A = Matrix(0, nrow=2*N, ncol=P+N, sparse=TRUE)
-  model$sense = model$rhs = rep(NA, 2*N)
+  #
+  # `A_nrow` will serve a dual purpose of (a) keeping track of the current number
+  # of rows in A, updated after each row group is added, and (b) giving the
+  # offset that needs to be added to row indices of another matrix being rbound
+  # onto A as part of the rbinding process. Conceptually, A_nrow starts at 0L;
+  # an equivalent approach below only defines it after the first row group.
+  #
+  # `A_ncol` remains unchanged throughout
+  A_ncol = P_using_runs + N_using_taus
+  # The A matrix will be constructed from a list of "parts", rather than row
+  # groups. Most row groups will consist of one part each, but some (maybe just
+  # the residual constraint row groups) will consist of multiple parts. Parts
+  # must use the appropriate `i` values for the final A matrix (rather than
+  # relative values within their row group).
+  A_i_parts = list()
+  A_j_parts = list()
+  A_x_parts = list()
+  A_part_ind = 0L
+  model$sense = model$rhs = rep(NA, 2*N_using_taus)
 
   # First part of residual constraint
-  for (k in 1:r) {
-    model$A[(k-1)*n + 1:n, (k-1)*p + 1:p] = tau[k] * qarr[,,k]
+  for (k in 1:r_using_taus) {
+    A_part_ind <- A_part_ind + 1L
+    A_i_parts[[A_part_ind]] = rep((k-1)*n + 1:n, p)
+    A_j_parts[[A_part_ind]] = rep((tau_group_run_inds[[k]]-1)*p + 1:p, each=n)
+    A_x_parts[[A_part_ind]] = as.vector(tau[[k]] * qarr[,,k])
     model$sense[(k-1)*n + 1:n] = ">="
     model$rhs[(k-1)*n + 1:n] = tau[k] * y
   }
-  model$A[1:N, P + 1:N] = INN
+  A_part_ind <- A_part_ind + 1L
+  A_i_parts[[A_part_ind]] = 1:N_using_taus
+  A_j_parts[[A_part_ind]] = P_using_runs + 1:N_using_taus
+  A_x_parts[[A_part_ind]] = rep(1, N_using_taus)
 
   # Second part of residual constraint
-  for (k in 1:r) {
-    model$A[(r+k-1)*n + 1:n, (k-1)*p + 1:p] = (tau[k]-1) * qarr[,,k]
-    model$sense[(r+k-1)*n + 1:n] = ">="
-    model$rhs[(r+k-1)*n + 1:n] = (tau[k]-1) * y
+  for (k in 1:r_using_taus) {
+    A_part_ind <- A_part_ind + 1L
+    A_i_parts[[A_part_ind]] = rep((r_using_taus+k-1)*n + 1:n, p)
+    A_j_parts[[A_part_ind]] = rep((tau_group_run_inds[[k]]-1)*p + 1:p, each=n)
+    A_x_parts[[A_part_ind]] = as.vector((tau[[k]]-1) * qarr[,,k])
+    model$sense[(r_using_taus+k-1)*n + 1:n] = ">="
+    model$rhs[(r_using_taus+k-1)*n + 1:n] = (tau[k]-1) * y
   }
-  model$A[N + 1:N, P + 1:N] = INN
+  A_part_ind <- A_part_ind + 1L
+  A_i_parts[[A_part_ind]] = N_using_taus + 1:N_using_taus
+  A_j_parts[[A_part_ind]] = P_using_runs + 1:N_using_taus
+  A_x_parts[[A_part_ind]] = rep(1, N_using_taus)
+  A_nrow = 2L*N_using_taus
 
   # Group equality constraints, if needed
-  labels = unique(tau_groups); num_labels = length(labels)
-  if (num_labels < r) {
-    B = Matrix(0, nrow=p*(r-num_labels), ncol=P+N, sparse=TRUE)
-    Ipp = Diagonal(p)
-    count = 0
+  if (num_labels < r_using_taus) {
     for (label in labels) {
-      ind = which(tau_groups == label)
-      if (length(ind) > 1) {
-        for (k in 1:(length(ind)-1)) {
-          B[count + (k-1)*p + 1:p, (ind[k]-1)*p + 1:p] = -Ipp
-          B[count + (k-1)*p + 1:p, (ind[k+1]-1)*p + 1:p] = Ipp
-        }
-        count = count + (length(ind)-1)*p
+      absolute_run_inds_for_label = which(tau_group_runs[["values"]] == label)
+      for (left_relative_run_ind in seq_len(length(absolute_run_inds_for_label)-1)) {
+        right_relative_run_ind = left_relative_run_ind + 1L
+        left_absolute_run_ind = absolute_run_inds_for_label[[left_relative_run_ind]]
+        right_absolute_run_ind = absolute_run_inds_for_label[[right_relative_run_ind]]
+        A_part_ind <- A_part_ind + 1L
+        A_i_parts[[A_part_ind]] = A_nrow + c(1:p, 1:p)
+        A_j_parts[[A_part_ind]] = c((left_absolute_run_ind-1)*p + 1:p, (right_absolute_run_ind-1)*p + 1:p)
+        A_x_parts[[A_part_ind]] = c(rep(-1,p), rep(1,p))
+        A_nrow <- A_nrow + p
       }
     }
-    model$A = rbind(model$A, B)
-    model$sense = c(model$sense, rep(equal_sign, p*(r-num_labels)))
-    model$rhs = c(model$rhs, rep(0, p*(r-num_labels)))
+    model$sense = c(model$sense, rep(equal_sign, p*(r_using_runs-num_labels)))
+    model$rhs = c(model$rhs, rep(0, p*(r_using_runs-num_labels)))
   }
 
   # Unit sum constraints on alpha, if we're asked to
   if (unit_sum) {
-    vec = rep(1,p); if (intercept) vec[1] = 0
-    B = Matrix(0, nrow=r, ncol=P+N, sparse=TRUE)
-    for (k in 1:r) B[k, (k-1)*p + 1:p] = vec
-    model$A = rbind(model$A, B)
-    model$sense = c(model$sense, rep(equal_sign, r))
-    model$rhs = c(model$rhs, rep(1, r))
+    A_part_ind <- A_part_ind + 1L
+    if (intercept) {
+      A_i_parts[[A_part_ind]] = A_nrow + rep(seq_len(r_using_runs), each=p-1L)
+      A_j_parts[[A_part_ind]] = rep(seq.int(0L, P_using_runs-p, p), each=p-1L) + seq.int(2L,p) # (recycling)
+      A_x_parts[[A_part_ind]] = rep(1, (p-1L)*r_using_runs)
+    } else {
+      A_i_parts[[A_part_ind]] = A_nrow + rep(seq_len(r_using_runs), each=p)
+      A_j_parts[[A_part_ind]] = seq_len(P_using_runs)
+      A_x_parts[[A_part_ind]] = rep(1, P_using_runs)
+    }
+    A_nrow <- A_nrow + r_using_runs
+    model$sense = c(model$sense, rep(equal_sign, r_using_runs))
+    model$rhs = c(model$rhs, rep(1, r_using_runs))
   }
 
   # Remove nonnegativity constraint on alpha, if we're asked to
   if (!nonneg) {
-    if (use_gurobi) model$lb = c(rep(-Inf,P), rep(0,N))
-    else model$lb = list(lower=list(ind=1:P, val=rep(-Inf,P)))
+    if (use_gurobi) model$lb = c(rep(-Inf,P_using_runs), rep(0,N_using_taus))
+    else model$lb = list(lower=list(ind=1:P_using_runs, val=rep(-Inf,P_using_runs)))
   }
 
   # Remove nonnegativity constraint on intercepts, if needed
   if (intercept && nonneg) {
-    if (use_gurobi) model$lb = c(rep(c(-Inf, rep(0,p-1)), r), rep(0,N))
-    else model$lb = list(lower=list(ind=(0:(r-1))*p + 1, val=rep(-Inf,r)))
+    if (use_gurobi) model$lb = c(rep(c(-Inf, rep(0,p-1)), r_using_runs), rep(0,N_using_taus))
+    else model$lb = list(lower=list(ind=(0:(r_using_runs-1))*p + 1, val=rep(-Inf,r_using_runs)))
   }
 
   # Noncrossing constraints, if we're asked to
   if (noncross) {
     n0 = dim(q0)[1]
-    B = Matrix(0, nrow=n0*(r-1), ncol=N+P, sparse=TRUE)
-    for (k in 1:(r-1)) {
-      B[(k-1)*n0 + 1:n0, (k-1)*p + 1:p] = -q0[,,k]
-      B[(k-1)*n0 + 1:n0, k*p + 1:p] = q0[,,k+1]
+    if (nonneg && !any(apply(q0, 1:2, is.unsorted))) {
+      # In this case, we can form noncrossing constraints by run rather than by
+      # tau. For two taus within the same run or group, we already have that
+      # group_coefs dot q0[i,,k1] <= group_coefs dot q0[i,,k2] for k1 <= k2
+      # using nonnegativity and sortedness.
+      ks_for_run_ends = cumsum(tau_group_runs[["lengths"]])
+      for (left_absolute_run_ind in 1:(r_using_runs-1)) {
+        right_absolute_run_ind = left_absolute_run_ind + 1L
+        A_part_ind <- A_part_ind + 1L
+        A_i_parts[[A_part_ind]] = A_nrow + c(rep(seq_len(n0), p),
+                                             rep(seq_len(n0), p))
+        A_j_parts[[A_part_ind]] = c(rep(( left_absolute_run_ind-1L)*p + 1:p, each=n0),
+                                    rep((right_absolute_run_ind-1L)*p + 1:p, each=n0))
+        A_x_parts[[A_part_ind]] = c(-q0[,,ks_for_run_ends[[left_absolute_run_ind]]   ],
+                                     q0[,,ks_for_run_ends[[left_absolute_run_ind]]+1L])
+        A_nrow <- A_nrow + n0
+      }
+      model$sense = c(model$sense, rep(">=", n0*(r_using_runs-1)))
+      model$rhs = c(model$rhs, rep(0, n0*(r_using_runs-1)))
+    } else {
+      for (k in 1:(r_using_taus-1)) {
+        A_part_ind <- A_part_ind + 1L
+        A_i_parts[[A_part_ind]] = A_nrow + c(rep(seq_len(n0), p),
+                                             rep(seq_len(n0), p))
+        A_j_parts[[A_part_ind]] = c(rep((tau_group_run_inds[[k   ]]-1L)*p + 1:p, each=n0),
+                                    rep((tau_group_run_inds[[k+1L]]-1L)*p + 1:p, each=n0))
+        A_x_parts[[A_part_ind]] = c(-q0[,,k   ],
+                                     q0[,,k+1L])
+        A_nrow <- A_nrow + n0
+      }
+      model$sense = c(model$sense, rep(">=", n0*(r_using_taus-1)))
+      model$rhs = c(model$rhs, rep(0, n0*(r_using_taus-1)))
     }
-    model$A = rbind(model$A, B)
-    model$sense = c(model$sense, rep(">=", n0*(r-1)))
-    model$rhs = c(model$rhs, rep(0, n0*(r-1)))
   }
+
+  # Build model$A from parts:
+  model$A = new("dgTMatrix", # `d`ouble-type entries, `g`eneral structure, `T`sparse (ijx format)
+    i = as.integer(do.call(c, A_i_parts[seq_len(A_part_ind)])) - 1L,
+    j = as.integer(do.call(c, A_j_parts[seq_len(A_part_ind)])) - 1L,
+    x = as.numeric(do.call(c, A_x_parts[seq_len(A_part_ind)])),
+    Dim = as.integer(c(A_nrow, A_ncol))
+  )
 
   # Call Gurobi's LP solver, store results
   if (use_gurobi) {
     a = gurobi::gurobi(model=model, params=params)
-    alpha = matrix(a$x[1:P],p,r)
+    alpha_for_runs = matrix(a$x[1:P_using_runs],p,r_using_runs)
     status = a$status
   }
 
@@ -367,9 +455,13 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   else {
     a = Rglpk_solve_LP(obj=model$obj, mat=model$A, dir=model$sense,
                        rhs=model$rhs, bounds=model$lb, control=params)
-    alpha = matrix(a$solution[1:P],p,r)
+    alpha_for_runs = matrix(a$solution[1:P_using_runs],p,r_using_runs)
     status = a$status
   }
+
+  # alpha_for_runs is p x r_using_runs, while the output alpha is expected to be
+  # p x r_using_taus; duplicate appropriately:
+  alpha = alpha_for_runs[, rep.int(seq_len(r_using_runs), tau_group_runs[["lengths"]]), drop=FALSE]
 
   return(enlist(alpha, status))
 }

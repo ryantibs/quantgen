@@ -3,8 +3,10 @@ Type: Package
 Title: Tools for generalized quantile modeling
 Version: 1.0.0
 Date: 2020-06-06
-Authors@R: person(given = "Ryan", family = "Tibshirani",
-           role = c("aut", "cre"), email = "ryantibs@cmu.edu")
+Authors@R: c(person(given = "Ryan", family = "Tibshirani",
+           role = c("aut", "cre"), email = "ryantibs@cmu.edu"),
+           person(given = "Logan", family = "Brooks",
+           role = "aut", email = "lcbrooks@andrew.cmu.edu"))
 URL: https://ryantibs.github.io/quantgen/, https://github.com/ryantibs/quantgen/ 
 BugReports: https://github.com/ryantibs/quantgen/
 Description: Tools for generalized quantile modeling: regularized quantile 
@@ -17,4 +19,8 @@ Imports:
     Matrix,
     Rglpk
 Suggests: 
-    gurobi
+    gurobi,
+    testthat,
+    mockery
+Config/testthat/edition: 3
+
