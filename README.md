@@ -75,7 +75,7 @@ To install the `quantgen` R package directly from GitHub, run the following in
 R:
 
 ```{r}
-devtools::install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
+devtools::install_github(repo="ryantibs/quantgen", subdir="quantgen")
 ```
 
 ### Install the `gurobi` R package
