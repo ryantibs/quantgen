@@ -24,7 +24,7 @@ This package is not on CRAN yet, so it can be installed using the
 [`devtools`](https://cran.r-project.org/package=devtools) package:
 
 ```{r, eval = FALSE}
-devtools::install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen")
+devtools::install_github(repo="ryantibs/quantgen", subdir="quantgen")
 ```
 
 Building the vignettes takes a substantial amount of time. They are not included
@@ -32,7 +32,7 @@ in the package by default. If you want to include vignettes (for local access),
 then you can use:
 
 ```{r, eval = FALSE}
-devtools::install_github(repo="ryantibs/quantgen", subdir="R-package/quantgen",
+devtools::install_github(repo="ryantibs/quantgen", subdir="quantgen",
                          build_vignettes=TRUE, dependencies=TRUE)
 ```
 
