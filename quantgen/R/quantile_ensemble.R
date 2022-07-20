@@ -125,7 +125,7 @@ quantile_ensemble = function(qarr, y, tau, weights=NULL,
       # If there's no q0 passed, then just use the training points
       if (is.null(q0)) q0 = qarr
       # If there's one passed, then account for intercept if needed
-      if (!is.null(q0) && intercept) {
+      else if (intercept) {
         n0 = dim(q0)[1]; a0 = array(NA, dim=c(n0,p,r))
         for (k in 1:r) a0[,,k] = cbind(rep(1,n0), q0[,,k])
         q0 = a0
