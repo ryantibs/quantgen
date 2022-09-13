@@ -51,7 +51,7 @@ setup_xyd = function(x, y, d, weights=NULL, intercept=TRUE, standardize=TRUE,
   
   # Remove NA values present in x or y
   good_inds = rowSums(is.na(x)) == 0 & !is.na(y)
-  x = x[good_inds,]
+  x = x[good_inds,,drop=FALSE]
   y = y[good_inds]
   n = sum(good_inds)
 
