@@ -153,11 +153,13 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
 
   # Properly set up x0, if there's noncrossing constraints 
   if (noncross) {
-    # If there's no x0 passed, then just use the training points
-    if (is.null(x0)) x0 = x
-    # If there's one passed, then check for standardization/intercept, and
-    # adjust x0 if needed
-    if (!is.null(x0)) {
+    if (is.null(x0)) {
+      # If there's no x0 passed, then just use the training points
+      # (which have already been centered/standardized)
+      x0 = x
+    } else {
+      # If there's one passed, then check for standardization/intercept, and
+      # adjust x0 if needed
       if (standardize) x0 = scale(x0,bx,sx)
       if (intercept) x0 = cbind(rep(1,nrow(x0)), x0)
     }
