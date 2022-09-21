@@ -53,8 +53,8 @@ observation.}
 \item{intercept}{Should an intercept be included in the regression model?
 Default is TRUE.}
 
-\item{standardize}{Should the predictors be standardized (to have zero mean
-and unit variance) before fitting? Default is TRUE.}
+\item{standardize}{Should the predictors be standardized (to have unit
+variance) before fitting? Default is TRUE.}
 
 \item{lb, ub}{Lower and upper bounds, respectively, to place as constraints on
 the coefficients in the optimization problem. These can be constants (to
