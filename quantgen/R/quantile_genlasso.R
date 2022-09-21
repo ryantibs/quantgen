@@ -534,7 +534,7 @@ get_lambda_max = function(x, y, d, weights=NULL, lp_solver=c("glpk","gurobi")) {
   o = which(apply(d, 2, function(v) all(abs(v) <= sqrt(.Machine$double.eps))))
   if (length(o) > 0) {
     d = d[,-o]
-    x = x[,-o]
+    x = x[,-o,drop=FALSE]
     p = p - length(o)
   }
 
