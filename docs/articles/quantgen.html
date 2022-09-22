@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">quantgen</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../articles/quantgen.html">Get started</a>
 </li>
@@ -50,7 +46,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -76,7 +72,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/ryantibs/quantgen/">
+  <a href="https://github.com/ryantibs/quantgen/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -91,13 +87,13 @@
 
       
 
-      </header><script src="quantgen_files/header-attrs-2.10/header-attrs.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Getting started with quantgen</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ryantibs/quantgen/blob/master/vignettes/quantgen.Rmd"><code>vignettes/quantgen.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ryantibs/quantgen/blob/HEAD/vignettes/quantgen.Rmd" class="external-link"><code>vignettes/quantgen.Rmd</code></a></small>
       <div class="hidden name"><code>quantgen.Rmd</code></div>
 
     </div>
@@ -111,88 +107,97 @@
 \newcommand{\st}{\mathop{\mathrm{subject\,\,to}}}
 \]</span></p>
 <p>This package provides tools for generalized quantile modeling: regularized quantile regression (with generalized lasso penalties and noncrossing constraints), cross-validation, quantile extrapolation, and quantile ensembles.</p>
-<div id="installing" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installing" class="anchor"></a>Installing</h2>
-<p>This package is not on CRAN yet, so it can be installed using the <a href="https://cran.r-project.org/package=devtools"><code>devtools</code></a> package:</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="kw">repo</span><span class="kw">=</span><span class="st">"ryantibs/quantgen"</span>, <span class="kw">subdir</span><span class="kw">=</span><span class="st">"quantgen"</span>)</pre></body></html></div>
+<div class="section level2">
+<h2 id="installing">Installing<a class="anchor" aria-label="anchor" href="#installing"></a>
+</h2>
+<p>This package is not on CRAN yet, so it can be installed using the <a href="https://cran.r-project.org/package=devtools" class="external-link"><code>devtools</code></a> package:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span>repo<span class="op">=</span><span class="st">"ryantibs/quantgen"</span>, subdir<span class="op">=</span><span class="st">"quantgen"</span><span class="op">)</span></span></code></pre></div>
 <p>Building the vignettes takes a substantial amount of time. They are not included in the package by default. If you want to include vignettes (for local access), then you can use:</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="kw">repo</span><span class="kw">=</span><span class="st">"ryantibs/quantgen"</span>, <span class="kw">subdir</span><span class="kw">=</span><span class="st">"quantgen"</span>,
-                         <span class="kw">build_vignettes</span><span class="kw">=</span><span class="fl">TRUE</span>, <span class="kw">dependencies</span><span class="kw">=</span><span class="fl">TRUE</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span>repo<span class="op">=</span><span class="st">"ryantibs/quantgen"</span>, subdir<span class="op">=</span><span class="st">"quantgen"</span>,</span>
+<span>                         build_vignettes<span class="op">=</span><span class="cn">TRUE</span>, dependencies<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="quantile-lasso" class="section level2">
-<h2 class="hasAnchor">
-<a href="#quantile-lasso" class="anchor"></a>Quantile lasso</h2>
+<div class="section level2">
+<h2 id="quantile-lasso">Quantile lasso<a class="anchor" aria-label="anchor" href="#quantile-lasso"></a>
+</h2>
 <p>Here we give some basic examples of how to fit a quantile lasso model. For details on how this problem is defined (and how <code>quantgen</code> casts it into a linear program), see the [mathematical details vignette].</p>
 <p>To fit a quantile lasso model, we can use <code><a href="../reference/quantile_lasso.html">quantile_lasso()</a></code>. Below, we do so at the quantile level <span class="math inline">\(\tau = 0.8\)</span>:</p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">quantgen</span>)
-
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">0</span>)
-<span class="no">n</span> <span class="kw">=</span> <span class="fl">100</span>
-<span class="no">p</span> <span class="kw">=</span> <span class="fl">10</span>
-<span class="no">x</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="no">n</span>*<span class="no">p</span>), <span class="no">n</span>, <span class="no">p</span>)
-<span class="no">x0</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="no">p</span>)
-<span class="no">mu</span> <span class="kw">=</span> <span class="kw">function</span>(<span class="no">x</span>) <span class="fl">2</span> + <span class="no">x</span>[<span class="fl">1</span>] + <span class="no">x</span>[<span class="fl">2</span>]
-<span class="no">y</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span>(<span class="no">x</span>, <span class="fl">1</span>, <span class="no">mu</span>) + <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="no">n</span>)
-
-<span class="no">tau</span> <span class="kw">=</span> <span class="fl">0.8</span>
-<span class="no">lambda</span> <span class="kw">=</span> <span class="fl">2</span> * <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="fu"><a href="../reference/get_lambda_max.html">get_lambda_max</a></span>(<span class="no">x</span>, <span class="no">y</span>, <span class="kw pkg">Matrix</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html">Diagonal</a></span>(<span class="no">p</span>)))
-<span class="no">obj</span> <span class="kw">=</span> <span class="fu"><a href="../reference/quantile_lasso.html">quantile_lasso</a></span>(<span class="no">x</span>, <span class="no">y</span>, <span class="kw">tau</span><span class="kw">=</span><span class="no">tau</span>, <span class="kw">lambda</span><span class="kw">=</span><span class="no">lambda</span>)
-
-<span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span>(<span class="no">obj</span>)</pre></body></html></div>
-<pre><code>## [1] "quantile_lasso"    "quantile_genlasso"</code></pre>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(<span class="no">obj</span>), <span class="fl">3</span>) <span class="co"># Vector of length p + 1 (first entry is the intercept)</span></pre></body></html></div>
-<pre><code>##  [1] 2.885 0.395 0.656 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000</code></pre>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span>(<span class="no">obj</span>, <span class="kw">newx</span><span class="kw">=</span><span class="no">x0</span>)</pre></body></html></div>
-<pre><code>##          [,1]
-## [1,] 3.979133</code></pre>
-<p>The default in <code><a href="../reference/quantile_lasso.html">quantile_lasso()</a></code> is to include an intercept in the model (via <code>intercept = TRUE</code>) and to standardize the predictors (to have zero mean and unit norm, via <code>standardize = TRUE</code>). <strong>Important note</strong> (obvious in hindsight, but important nonetheless): in a quantile model, the intercept cannot be omitted by simply centering the response and the predictors, as it can in a standard regression model. The intercept depends critically on the quantile level <span class="math inline">\(\tau\)</span>. Above, the fact that the estimated intercept exceeds 2 is <em>not</em> an instance of poor estimation in the quantile lasso model, but reflects the gap between the level 0.8 and 0.5 quantiles of the standard normal distribution (note that <code><a href="https://rdrr.io/r/stats/Normal.html">qnorm(0.8)</a></code> <span class="math inline">\(\approx 0.84\)</span>).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ryantibs.github.io/quantgen/" class="external-link">quantgen</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">n</span> <span class="op">=</span> <span class="fl">100</span></span>
+<span><span class="va">p</span> <span class="op">=</span> <span class="fl">10</span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">*</span><span class="va">p</span><span class="op">)</span>, <span class="va">n</span>, <span class="va">p</span><span class="op">)</span></span>
+<span><span class="va">x0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
+<span><span class="va">mu</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">2</span> <span class="op">+</span> <span class="va">x</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">x</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span>
+<span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="va">mu</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tau</span> <span class="op">=</span> <span class="fl">0.8</span></span>
+<span><span class="va">lambda</span> <span class="op">=</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_lambda_max.html">get_lambda_max</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html" class="external-link">Diagonal</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">obj</span> <span class="op">=</span> <span class="fu"><a href="../reference/quantile_lasso.html">quantile_lasso</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tau<span class="op">=</span><span class="va">tau</span>, lambda<span class="op">=</span><span class="va">lambda</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "quantile_lasso"    "quantile_genlasso"</span></span></code></pre>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">obj</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span> <span class="co"># Vector of length p + 1 (first entry is the intercept)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] 2.885 0.395 0.656 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000</span></span></code></pre>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">obj</span>, newx<span class="op">=</span><span class="va">x0</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##          [,1]</span></span>
+<span><span class="co">## [1,] 3.979133</span></span></code></pre>
+<p>The default in <code><a href="../reference/quantile_lasso.html">quantile_lasso()</a></code> is to include an intercept in the model (via <code>intercept = TRUE</code>) and to standardize the predictors (to have unit norm, via <code>standardize = TRUE</code>). <strong>Important note</strong> (obvious in hindsight, but important nonetheless): in a quantile model, the intercept cannot be omitted by simply centering the response and the predictors, as it can in a standard regression model. The intercept depends critically on the quantile level <span class="math inline">\(\tau\)</span>. Above, the fact that the estimated intercept exceeds 2 is <em>not</em> an instance of poor estimation in the quantile lasso model, but reflects the gap between the level 0.8 and 0.5 quantiles of the standard normal distribution (note that <code>qnorm(0.8)</code> <span class="math inline">\(\approx 0.84\)</span>).</p>
 <p>The <code><a href="../reference/get_lambda_max.html">get_lambda_max()</a></code> function computes (approximately) the effective maximum of the regularization path for a penalized quantile model with <span class="math inline">\(\tau = 0.5\)</span>, given a predictor matrix, response vector, and penalty matrix. In the case of the lasso, the penalty matrix is the identity.</p>
-<p>We can see that the <code><a href="../reference/quantile_lasso.html">quantile_lasso()</a></code> function returns an object of class <code>quantile_lasso</code> (inherited from <code>quantile_genlasso</code>), and comes with associated utilities <code><a href="https://rdrr.io/r/stats/coef.html">coef()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code>.</p>
+<p>We can see that the <code><a href="../reference/quantile_lasso.html">quantile_lasso()</a></code> function returns an object of class <code>quantile_lasso</code> (inherited from <code>quantile_genlasso</code>), and comes with associated utilities <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>.</p>
 </div>
-<div id="multiple-quantiles" class="section level2">
-<h2 class="hasAnchor">
-<a href="#multiple-quantiles" class="anchor"></a>Multiple quantiles</h2>
+<div class="section level2">
+<h2 id="multiple-quantiles">Multiple quantiles<a class="anchor" aria-label="anchor" href="#multiple-quantiles"></a>
+</h2>
 <p>To fit solutions at multiple quantile levels, we can simply pass a vector for the <code>tau</code> argument:</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">tau_vec</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>)
-<span class="no">obj</span> <span class="kw">=</span> <span class="fu"><a href="../reference/quantile_lasso.html">quantile_lasso</a></span>(<span class="no">x</span>, <span class="no">y</span>, <span class="kw">tau</span><span class="kw">=</span><span class="no">tau_vec</span>, <span class="kw">lambda</span><span class="kw">=</span><span class="no">lambda</span>)
-
-<span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(<span class="no">obj</span>), <span class="fl">3</span>) <span class="co"># Matrix of dimension (p + 1) x (number of tau values)</span></pre></body></html></div>
-<pre><code>## 11 x 3 sparse Matrix of class "dgCMatrix"
-##       tau=0.1, lam=7.81 tau=0.5, lam=7.81 tau=0.9, lam=7.81
-##  [1,]             0.116             1.890             3.461
-##  [2,]             0.386             0.920             0.353
-##  [3,]             0.382             0.789             0.489
-##  [4,]             0.000             0.000             0.000
-##  [5,]             0.000             0.000             .    
-##  [6,]             0.000             0.000             0.000
-##  [7,]             0.000             0.059             0.000
-##  [8,]             0.000             0.000             0.000
-##  [9,]             .                 0.000             .    
-## [10,]             0.000             0.000             .    
-## [11,]             0.000             0.000             0.000</code></pre>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span>(<span class="no">obj</span>, <span class="kw">newx</span><span class="kw">=</span><span class="no">x0</span>)</pre></body></html></div>
-<pre><code>##      tau=0.1, lam=7.81 tau=0.5, lam=7.81 tau=0.9, lam=7.81
-## [1,]         0.7093832          3.074489          4.259551</code></pre>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tau_vec</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span></span>
+<span><span class="va">obj</span> <span class="op">=</span> <span class="fu"><a href="../reference/quantile_lasso.html">quantile_lasso</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tau<span class="op">=</span><span class="va">tau_vec</span>, lambda<span class="op">=</span><span class="va">lambda</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">obj</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span> <span class="co"># Matrix of dimension (p + 1) x (number of tau values)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 11 x 3 sparse Matrix of class "dgCMatrix"</span></span>
+<span><span class="co">##       tau=0.1, lam=7.81 tau=0.5, lam=7.81 tau=0.9, lam=7.81</span></span>
+<span><span class="co">##  [1,]             0.116             1.890             3.461</span></span>
+<span><span class="co">##  [2,]             0.386             0.920             0.353</span></span>
+<span><span class="co">##  [3,]             0.382             0.789             0.489</span></span>
+<span><span class="co">##  [4,]             0.000             0.000             0.000</span></span>
+<span><span class="co">##  [5,]             0.000             0.000             .    </span></span>
+<span><span class="co">##  [6,]             0.000             0.000             0.000</span></span>
+<span><span class="co">##  [7,]             0.000             0.059             0.000</span></span>
+<span><span class="co">##  [8,]             0.000             0.000             0.000</span></span>
+<span><span class="co">##  [9,]             .                 0.000             .    </span></span>
+<span><span class="co">## [10,]             0.000             .                 .    </span></span>
+<span><span class="co">## [11,]             0.000             0.000             0.000</span></span></code></pre>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">obj</span>, newx<span class="op">=</span><span class="va">x0</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##      tau=0.1, lam=7.81 tau=0.5, lam=7.81 tau=0.9, lam=7.81</span></span>
+<span><span class="co">## [1,]         0.7093832          3.074489          4.259551</span></span></code></pre>
 <p>To fit solutions at multiple tuning parameter values, we can also pass a vector for the <code>lambda</code> argument, in which case <code><a href="../reference/quantile_lasso.html">quantile_lasso()</a></code> internally recycles the <code>tau</code> and <code>lambda</code> arguments so that they have equal length, and then solves separate quantile lasso problems, each with a quantile level <code>tau[i]</code> and tuning parameter <code>lambda[i]</code>. The two most common use cases are to pass a single value for <code>tau</code> and a vector for <code>lambda</code>, or to pass a vector for <code>tau</code> and a single value for <code>lambda</code>.</p>
 </div>
-<div id="tau-x-lambda-grid" class="section level2">
-<h2 class="hasAnchor">
-<a href="#tau-x-lambda-grid" class="anchor"></a>Tau x lambda grid</h2>
+<div class="section level2">
+<h2 id="tau-x-lambda-grid">Tau x lambda grid<a class="anchor" aria-label="anchor" href="#tau-x-lambda-grid"></a>
+</h2>
 <p>Solving quantile lasso problems over a two-dimensional grid of quantile levels and tuning parameter values is most convenient with <code><a href="../reference/quantile_lasso_grid.html">quantile_lasso_grid()</a></code>. In this function, passing <code>lambda</code> is optional; when not specified, the function <code><a href="../reference/quantile_lasso_grid.html">quantile_lasso_grid()</a></code> internally sets <code>lambda</code> to be a vector of length <code>nlambda = 30</code>, log-spaced between the value computed by <code><a href="../reference/get_lambda_max.html">get_lambda_max()</a></code> and <code>lambda_min_ratio = 0.001</code> times this value.</p>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="no">obj</span> <span class="kw">=</span> <span class="fu"><a href="../reference/quantile_lasso_grid.html">quantile_lasso_grid</a></span>(<span class="no">x</span>, <span class="no">y</span>, <span class="no">tau_vec</span>)
-
-<span class="co"># Matrix of dimension (p + 1) x (number of tau and lambda pairs)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(<span class="no">obj</span>))</pre></body></html></div>
-<pre><code>## [1] 11 90</code></pre>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="co"># Array of dimension (number of x0 points) x (number of lambda values) x </span>
-<span class="co"># (number of tau values)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span>(<span class="no">obj</span>, <span class="kw">new</span><span class="kw">=</span><span class="no">x0</span>))</pre></body></html></div>
-<pre><code>## [1]  1 30  3</code></pre>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">obj</span> <span class="op">=</span> <span class="fu"><a href="../reference/quantile_lasso_grid.html">quantile_lasso_grid</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">tau_vec</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Matrix of dimension (p + 1) x (number of tau and lambda pairs)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">obj</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<pre><code><span><span class="co">## [1] 11 90</span></span></code></pre>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Array of dimension (number of x0 points) x (number of lambda values) x </span></span>
+<span><span class="co"># (number of tau values)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">obj</span>, new<span class="op">=</span><span class="va">x0</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<pre><code><span><span class="co">## [1]  1 30  3</span></span></code></pre>
 </div>
-<div id="other-options" class="section level2">
-<h2 class="hasAnchor">
-<a href="#other-options" class="anchor"></a>Other options</h2>
+<div class="section level2">
+<h2 id="other-options">Other options<a class="anchor" aria-label="anchor" href="#other-options"></a>
+</h2>
 <p>The <code><a href="../reference/quantile_lasso.html">quantile_lasso()</a></code> function is a special case of its a parent function <code><a href="../reference/quantile_genlasso.html">quantile_genlasso()</a></code>, which allows for specification of a general penalty matrix. Both <code><a href="../reference/quantile_lasso.html">quantile_lasso()</a></code> and <code><a href="../reference/quantile_genlasso.html">quantile_genlasso()</a></code> have several other options that you can read about in their documentation:</p>
 <ul>
 <li>observation weights, which can be set via <code>weights</code>;</li>
@@ -214,11 +219,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Ryan Tibshirani, Logan Brooks.</p>
+  <p></p>
+<p>Developed by Ryan Tibshirani, Logan Brooks.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
@@ -226,6 +233,8 @@
 
   
 
+
+  
 
   </body>
 </html>

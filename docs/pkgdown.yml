@@ -1,5 +1,5 @@
-pandoc: 2.10.1
-pkgdown: 1.5.1
+pandoc: 2.16.2
+pkgdown: 2.0.6
 pkgdown_sha: ~
 articles:
   cross_validation: cross_validation.html
@@ -8,5 +8,5 @@ articles:
   quantgen: quantgen.html
   quantile_extrapolation: quantile_extrapolation.html
   quantile_stacking: quantile_stacking.html
-last_built: 2021-08-29T13:29Z
+last_built: 2022-09-22T20:45Z
 
