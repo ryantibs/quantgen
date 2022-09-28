@@ -21,8 +21,8 @@
 #'   observation.
 #' @param intercept Should an intercept be included in the regression model?
 #'   Default is TRUE.
-#' @param standardize Should the predictors be standardized (to have zero mean
-#'   and unit variance) before fitting? Default is TRUE.
+#' @param standardize Should the predictors be standardized (to have unit
+#'   variance) before fitting? Default is TRUE.
 #' @param lb,ub Lower and upper bounds, respectively, to place as constraints on
 #'   the coefficients in the optimization problem. These can be constants (to
 #'   place the same bound on each coefficient) or vectors of length equal to the
@@ -158,9 +158,9 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
       # (which have already been centered/standardized)
       x0 = x
     } else {
-      # If there's one passed, then check for standardization/intercept, and
-      # adjust x0 if needed
-      if (standardize) x0 = scale(x0,bx,sx)
+      # If there's one passed, then standardize and add intercept if
+      # necessary
+      x0 = scale(x0,bx,sx)
       if (intercept) x0 = cbind(rep(1,nrow(x0)), x0)
     }
   }
@@ -173,10 +173,12 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL, intercept=TRUE,
                              params=params, jitter=jitter, verbose=verbose)
 
   # Transform beta back to original scale, if we standardized
-  if (standardize) {
-    if (!intercept) obj$beta = rbind(rep(0,length(tau)), obj$beta)
-    obj$beta[1,] = obj$beta[1,] - (bx/sx) %*% obj$beta[-1,]
+  if (intercept) {
     obj$beta[-1,] = Diagonal(x=1/sx) %*% obj$beta[-1,]
+    # Restore intercept offset, if we centered
+    obj$beta[1,] = obj$beta[1,] - bx %*% obj$beta[-1,]
+  } else {
+    obj$beta = Diagonal(x=1/sx) %*% obj$beta
   }
 
   colnames(obj$beta) = sprintf("tau=%g, lam=%g", round(tau,2), round(lambda,2))

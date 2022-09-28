@@ -59,13 +59,21 @@ setup_xyd = function(x, y, d, weights=NULL, intercept=TRUE, standardize=TRUE,
   if (is.null(weights)) weights = rep(1,n)
   else weights = weights[good_inds]
   
+  # Center the columns of x, if an intercept is being fitted
+  if (intercept) {
+    bx = apply(x,2,mean)
+  } else {
+    bx = rep(0.0, times=p)
+  }
   # Standardize the columns of x, if we're asked to
   if (standardize) {
-    bx = apply(x,2,mean)
     sx = apply(x,2,sd)
     sx[sx < sqrt(.Machine$double.eps)] = 1 # Don't divide by zero!
-    x = scale(x,bx,sx)
+  } else {
+    sx = rep(1.0, times=p)
   }
+  # If neither intercept nor standardize, then x is unchanged
+  x = scale(x,bx,sx)
 
   # Add all 1s column to x, and all 0s column to d, if we need to
   if (intercept) {
